@@ -20,6 +20,12 @@ export type Screen =
 
 export type TabName = "home" | "discover" | "profile";
 
+export type NavMotion = {
+  direction: -1 | 0 | 1;
+  kind: "push" | "back" | "replace" | "tab";
+  sequence: number;
+};
+
 interface NavValue {
   stack: Screen[];
   current: Screen;
@@ -28,24 +34,57 @@ interface NavValue {
   back: () => void;
   resetTo: (s: Screen) => void;
   canBack: boolean;
+  motion: NavMotion;
 }
 
 const NavContext = createContext<NavValue | null>(null);
 
 export function NavProvider({ children }: { children: ReactNode }) {
   const [stack, setStack] = useState<Screen[]>([{ name: "home" }]);
+  const [motion, setMotion] = useState<NavMotion>({
+    direction: 0,
+    kind: "tab",
+    sequence: 0,
+  });
 
-  const push = useCallback((s: Screen) => setStack((st) => [...st, s]), []);
-  const replace = useCallback(
-    (s: Screen) => setStack((st) => [...st.slice(0, -1), s]),
+  const announceMotion = useCallback(
+    (direction: NavMotion["direction"], kind: NavMotion["kind"]) => {
+      setMotion((current) => ({
+        direction,
+        kind,
+        sequence: current.sequence + 1,
+      }));
+    },
     [],
+  );
+
+  const push = useCallback((s: Screen) => {
+    announceMotion(1, "push");
+    setStack((st) => [...st, s]);
+  }, [announceMotion]);
+  const replace = useCallback(
+    (s: Screen) => {
+      announceMotion(1, "replace");
+      setStack((st) => [...st.slice(0, -1), s]);
+    },
+    [announceMotion],
   );
   const back = useCallback(
-    () => setStack((st) => (st.length > 1 ? st.slice(0, -1) : st)),
-    [],
+    () => {
+      announceMotion(-1, "back");
+      setStack((st) => (st.length > 1 ? st.slice(0, -1) : st));
+    },
+    [announceMotion],
   );
   // 切底部 Tab：重置栈到该根屏
-  const resetTo = useCallback((s: Screen) => setStack([s]), []);
+  const resetTo = useCallback((s: Screen) => {
+    const tabOrder: Record<string, number> = { home: 0, discover: 1, profile: 3 };
+    const from = tabOrder[stack[0]?.name] ?? 0;
+    const to = tabOrder[s.name] ?? from;
+    const direction: NavMotion["direction"] = to === from ? 0 : to > from ? 1 : -1;
+    announceMotion(direction, "tab");
+    setStack([s]);
+  }, [announceMotion, stack]);
 
   const value = useMemo<NavValue>(
     () => ({
@@ -56,8 +95,9 @@ export function NavProvider({ children }: { children: ReactNode }) {
       back,
       resetTo,
       canBack: stack.length > 1,
+      motion,
     }),
-    [stack, push, replace, back, resetTo],
+    [stack, push, replace, back, resetTo, motion],
   );
 
   return <NavContext.Provider value={value}>{children}</NavContext.Provider>;

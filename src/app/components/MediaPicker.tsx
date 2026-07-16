@@ -2,10 +2,16 @@ import { Music, ImageIcon, Type, X, Puzzle } from "lucide-react";
 import type { Media, Fragment } from "../data/types";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { fmtTime } from "../player";
+import mondrianGroove from "../../assets/content/fragments/mondrian-groove.jpg";
+import mondrianFragment from "../../assets/content/fragments/mondrian-fragment.jpg";
+import yellowSongCover from "../../assets/content/covers/yellow-song-cover.jpg";
+import cityLightsCover from "../../assets/content/covers/city-lights-cover.jpg";
 
 const PIC_PRESETS = [
-  "https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-  "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
+  mondrianGroove,
+  mondrianFragment,
+  yellowSongCover,
+  cityLightsCover,
 ];
 
 export function MediaPicker({

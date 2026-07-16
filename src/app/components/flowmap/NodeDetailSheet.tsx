@@ -1,4 +1,5 @@
 import { Play, Pause, GitBranch, Lock, X, ArrowUpRight } from "lucide-react";
+import { motion } from "motion/react";
 import type { FlowNode } from "../../data/types";
 import { useFlowStore, canContinue } from "../../data/store";
 import { useNav } from "../../nav";
@@ -18,8 +19,22 @@ export function NodeDetailSheet({ node, onClose }: { node: FlowNode; onClose: ()
   const refFrags = node.fragmentRefs.map((id) => state.fragments[id]).filter(Boolean);
 
   return (
-    <div className="absolute inset-0 z-40 flex items-end bg-black/30" onClick={onClose}>
-      <div className="w-full rounded-t-3xl bg-white p-5 pb-7" onClick={(e) => e.stopPropagation()}>
+    <motion.div
+      className="absolute inset-0 z-40 flex items-end bg-black/30"
+      onClick={onClose}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+    >
+      <motion.div
+        className="w-full rounded-t-3xl bg-white p-5 pb-7"
+        onClick={(e) => e.stopPropagation()}
+        initial={{ y: "100%" }}
+        animate={{ y: 0 }}
+        exit={{ y: "100%" }}
+        transition={{ type: "spring", stiffness: 360, damping: 36, mass: 0.88 }}
+      >
         <div className="mx-auto mb-3 h-1 w-10 rounded-full" style={{ background: "var(--flow-gray)" }} />
         <div className="flex items-start gap-3">
           <FlowIcon kind={node.kind === "source" ? "source" : "flow"} size={44} completed={node.completed} />
@@ -96,7 +111,7 @@ export function NodeDetailSheet({ node, onClose }: { node: FlowNode; onClose: ()
             <ArrowUpRight size={20} />
           </button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

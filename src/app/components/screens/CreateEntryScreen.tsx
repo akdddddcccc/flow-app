@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FileStack, ChevronRight } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { toast } from "sonner";
 import { useFlowStore } from "../../data/store";
 import { ROLE_LIST, LICENSE_LABEL, type Media, type Role, type License } from "../../data/types";
@@ -8,14 +9,45 @@ import { TopBar } from "../TopBar";
 import { FlowIcon } from "../icons/FlowIcon";
 import { RoleChip } from "../chips/Chips";
 import { MediaPicker } from "../MediaPicker";
+import defaultSourceCover from "../../../assets/content/covers/yellow-song-cover.jpg";
 
 type Mode = "menu" | "fragment" | "source";
 
 export function CreateEntryScreen() {
   const [mode, setMode] = useState<Mode>("menu");
-  if (mode === "fragment") return <FragmentForm onBack={() => setMode("menu")} />;
-  if (mode === "source") return <SourceForm onBack={() => setMode("menu")} />;
-  return <Menu onPick={setMode} />;
+  const [direction, setDirection] = useState<1 | -1>(1);
+  const pick = (next: Mode) => {
+    setDirection(1);
+    setMode(next);
+  };
+  const back = () => {
+    setDirection(-1);
+    setMode("menu");
+  };
+
+  return (
+    <div className="relative h-full overflow-hidden">
+      <AnimatePresence initial={false} mode="sync" custom={direction}>
+        <motion.div
+          key={mode}
+          className="absolute inset-0"
+          custom={direction}
+          initial={{ opacity: 0, x: direction * 22 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: direction * -14 }}
+          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {mode === "fragment" ? (
+            <FragmentForm onBack={back} />
+          ) : mode === "source" ? (
+            <SourceForm onBack={back} />
+          ) : (
+            <Menu onPick={pick} />
+          )}
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
 }
 
 function Menu({ onPick }: { onPick: (m: Mode) => void }) {
@@ -36,14 +68,20 @@ function Menu({ onPick }: { onPick: (m: Mode) => void }) {
 
 function EntryBtn({ icon, title, desc, onClick }: { icon: React.ReactNode; title: string; desc: string; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="flex w-full items-center gap-3 rounded-2xl bg-white p-4 text-left shadow-[0_2px_12px_rgba(0,0,0,0.05)]">
+    <motion.button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center gap-3 rounded-2xl bg-white p-4 text-left shadow-[0_2px_12px_rgba(0,0,0,0.05)]"
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 440, damping: 32 }}
+    >
       {icon}
       <div className="min-w-0 flex-1">
         <p className="text-[15px] font-semibold">{title}</p>
         <p className="text-[12px]" style={{ color: "var(--flow-muted)" }}>{desc}</p>
       </div>
       <ChevronRight size={20} color="var(--flow-muted)" />
-    </button>
+    </motion.button>
   );
 }
 
@@ -95,7 +133,7 @@ function SourceForm({ onBack }: { onBack: () => void }) {
       type: "publishSource",
       title,
       description,
-      cover: `https://picsum.photos/seed/${encodeURIComponent(title || "new-source")}/900/540`,
+      cover: defaultSourceCover,
       license,
       roles,
       changeNote: changeNote || description,

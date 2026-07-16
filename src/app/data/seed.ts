@@ -1,17 +1,25 @@
 import type { AppState, FlowNode } from "./types";
+import chenAvatar from "../../assets/content/avatars/chen.jpg";
+import ayonAvatar from "../../assets/content/avatars/ayon.jpg";
+import shengAvatar from "../../assets/content/avatars/sheng.jpg";
+import aqueenAvatar from "../../assets/content/avatars/aqueen.jpg";
+import yellowSongCover from "../../assets/content/covers/yellow-song-cover.jpg";
+import cityLightsCover from "../../assets/content/covers/city-lights-cover.jpg";
+import mondrianGroove from "../../assets/content/fragments/mondrian-groove.jpg";
+import mondrianFragment from "../../assets/content/fragments/mondrian-fragment.jpg";
 
-// 展示版不依赖远程图片：素材未确定前使用受控纯色，保证作品集每次打开都一致。
-const SOLID: Record<string, string> = {
-  "chen-avatar": "#6d75a8",
-  "ayon-avatar": "#477770",
-  "sheng-avatar": "#9a675f",
-  "aqueen-avatar": "#80679e",
-  "mondrian-groove": "#8f7a35",
-  "mondrian-fragment": "#b69c34",
-  "yellow-song-cover": "#b69c34",
-  "city-lights-cover": "#18243f",
+// 所有展示素材都打包进项目，避免作品集上线后依赖第三方图片外链。
+const IMAGE_ASSETS: Record<string, string> = {
+  "chen-avatar": chenAvatar,
+  "ayon-avatar": ayonAvatar,
+  "sheng-avatar": shengAvatar,
+  "aqueen-avatar": aqueenAvatar,
+  "mondrian-groove": mondrianGroove,
+  "mondrian-fragment": mondrianFragment,
+  "yellow-song-cover": yellowSongCover,
+  "city-lights-cover": cityLightsCover,
 };
-const IMG = (slug: string, _w = 900, _h?: number) => `solid:${SOLID[slug] ?? "#667084"}`;
+const IMG = (slug: string, _w = 900, _h?: number) => IMAGE_ASSETS[slug] ?? yellowSongCover;
 
 const DAY = 86400000;
 const now = Date.now();

@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import { ZoomIn, ZoomOut, Locate, List, GitBranch, Play } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useFlowStore, selectNodesOfFlow } from "../../data/store";
 import { layoutFlow } from "../../data/layout";
 import type { FlowNode } from "../../data/types";
@@ -175,7 +176,9 @@ export function FlowMapScreen({ flowId, focusNodeId }: { flowId: string; focusNo
         </div>
       )}
 
-      {selected && <NodeDetailSheet node={selected} onClose={() => setSelected(null)} />}
+      <AnimatePresence>
+        {selected && <NodeDetailSheet node={selected} onClose={() => setSelected(null)} />}
+      </AnimatePresence>
     </div>
   );
 }
@@ -192,7 +195,7 @@ function NodeBox({ node, left, top, focus, onClick }: { node: FlowNode; left: nu
   const { state } = useFlowStore();
   const author = state.users[node.authorId];
   return (
-    <div
+    <motion.div
       role="button"
       tabIndex={0}
       onClick={onClick}
@@ -203,13 +206,15 @@ function NodeBox({ node, left, top, focus, onClick }: { node: FlowNode; left: nu
         outline: focus ? "3px solid var(--flow-blue)" : "1px solid rgba(0,0,0,0.05)",
         outlineOffset: focus ? "2px" : undefined,
       }}
+      whileTap={{ scale: 0.96 }}
+      transition={{ type: "spring", stiffness: 460, damping: 32 }}
     >
       <FlowIcon kind={node.parentId === null ? "source" : "flow"} size={34} completed={node.completed} />
       <div className="min-w-0 flex-1">
         <p className="truncate text-[11px] font-semibold leading-tight">{node.completedLabel ? `完成·${node.completedLabel}` : node.title}</p>
         <p className="truncate text-[10px]" style={{ color: "var(--flow-muted)" }}>{author?.name}</p>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

@@ -1,4 +1,5 @@
 import { Play, Pause, Heart, GitBranch } from "lucide-react";
+import { motion } from "motion/react";
 import type { FlowProject, Fragment } from "../data/types";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { FlowGlyph, FlowIcon } from "./icons/FlowIcon";
@@ -27,7 +28,14 @@ export function ProjectCard({ project, nodeCount }: { project: FlowProject; node
   const pb = tiers === 3 ? 16 : tiers === 2 ? 11 : tiers === 1 ? 7 : 0;
 
   return (
-    <div className="relative" style={{ paddingBottom: pb }}>
+    <motion.div
+      className="relative"
+      style={{ paddingBottom: pb }}
+      layout="position"
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+    >
 
       {/* Layer 3 — furthest back */}
       {tiers >= 3 && (
@@ -70,7 +78,7 @@ export function ProjectCard({ project, nodeCount }: { project: FlowProject; node
       )}
 
       {/* Main card */}
-      <article
+      <motion.article
         className="relative z-10 cursor-pointer overflow-hidden rounded-3xl"
         style={{ background: "var(--flow-blue)" }}
         role="button"
@@ -83,6 +91,8 @@ export function ProjectCard({ project, nodeCount }: { project: FlowProject; node
             nav.push({ name: "detail", targetId: project.id });
           }
         }}
+        whileTap={{ scale: 0.985 }}
+        transition={{ type: "spring", stiffness: 430, damping: 34 }}
       >
         {/* Cover photo: inset with own rounded corners */}
         <div className="relative mx-2.5 mt-2.5 overflow-hidden rounded-[18px]">
@@ -181,8 +191,8 @@ export function ProjectCard({ project, nodeCount }: { project: FlowProject; node
             </div>
           </div>
         </div>
-      </article>
-    </div>
+      </motion.article>
+    </motion.div>
   );
 }
 
@@ -197,7 +207,7 @@ export function FragmentCard({ fragment }: { fragment: Fragment }) {
   const goDetail = () => nav.push({ name: "detail", targetId: fragment.id });
 
   return (
-    <div
+    <motion.div
       role="button"
       tabIndex={0}
       aria-label={`查看${fragment.title}详情`}
@@ -209,6 +219,11 @@ export function FragmentCard({ fragment }: { fragment: Fragment }) {
         }
       }}
       className="flex w-full cursor-pointer items-center gap-3 rounded-2xl bg-white p-3 text-left shadow-[0_2px_12px_rgba(0,0,0,0.04)]"
+      layout="position"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileTap={{ scale: 0.985 }}
+      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
     >
       <div
         className="relative size-16 shrink-0 overflow-hidden rounded-xl"
@@ -258,6 +273,6 @@ export function FragmentCard({ fragment }: { fragment: Fragment }) {
           )}
         </button>
       )}
-    </div>
+    </motion.div>
   );
 }
