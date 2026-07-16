@@ -20,6 +20,27 @@ body,
 .flow-app-shell {
   height: 100dvh;
   min-height: 0;
+  transition:
+    width 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    max-width 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    height 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 320ms ease,
+    box-shadow 320ms ease;
+}
+
+/* 保留触控、触控板与鼠标滚轮滚动，但不暴露桌面网页式拖动条。 */
+.flow-app-shell,
+.flow-app-shell * {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.flow-app-shell::-webkit-scrollbar,
+.flow-app-shell *::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .flow-stage[data-embed="portfolio"] {
@@ -33,10 +54,33 @@ body,
     box-shadow: 0 28px 80px rgba(0, 0, 0, 0.24);
   }
 
+  .flow-stage[data-embed="standalone"] .flow-app-shell.flow-map-frame-landscape {
+    width: min(844px, calc(100vw - 32px));
+    max-width: 844px;
+    height: min(390px, calc(100dvh - 32px));
+    border-radius: 28px;
+    box-shadow: 0 24px 72px rgba(0, 0, 0, 0.22);
+  }
+
   .flow-stage[data-embed="portfolio"] .flow-app-shell {
     height: 100dvh;
     max-width: none;
     border-radius: 0;
     box-shadow: none;
+  }
+}
+
+/* 创作流在手机横屏时释放 430px 设备框，真正使用整块横向画布。 */
+@media (orientation: landscape) and (max-height: 600px) {
+  .flow-stage .flow-app-shell.flow-map-shell-active {
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .flow-map-screen > header {
+    height: 48px;
   }
 }

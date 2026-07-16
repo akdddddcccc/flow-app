@@ -1,6 +1,7 @@
+import { useEffect, useState } from "react";
 import { Play, Pause, Heart, GitBranch } from "lucide-react";
-import { motion } from "motion/react";
-import type { FlowProject, Fragment } from "../data/types";
+import { motion, useReducedMotion } from "motion/react";
+import type { FlowCardTone, FlowProject, Fragment } from "../data/types";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { FlowGlyph, FlowIcon } from "./icons/FlowIcon";
 import { usePlayer } from "../player";
@@ -8,9 +9,163 @@ import { useFlowStore } from "../data/store";
 import { useNav } from "../nav";
 import { fmtCount } from "../util";
 
+const CARD_TONES: Record<FlowCardTone, {
+  surface: string;
+  ink: string;
+  meta: string;
+  badge: string;
+  badgeGlyph: string;
+  button: string;
+  buttonInk: string;
+  border: string;
+  shadow: string;
+}> = {
+  blue: {
+    surface: "#2948ee",
+    ink: "#ffffff",
+    meta: "rgba(255,255,255,0.66)",
+    badge: "rgba(35,62,211,0.92)",
+    badgeGlyph: "#ffffff",
+    button: "rgba(255,255,255,0.94)",
+    buttonInk: "#2948ee",
+    border: "rgba(255,255,255,0.08)",
+    shadow: "0 4px 12px rgba(41,72,238,0.1)",
+  },
+  mist: {
+    surface: "#dfe2e7",
+    ink: "#111318",
+    meta: "rgba(17,19,24,0.56)",
+    badge: "rgba(17,19,24,0.82)",
+    badgeGlyph: "#ffffff",
+    button: "rgba(17,19,24,0.88)",
+    buttonInk: "#ffffff",
+    border: "rgba(17,19,24,0.08)",
+    shadow: "0 4px 12px rgba(47,54,67,0.08)",
+  },
+  graphite: {
+    surface: "#17191e",
+    ink: "#ffffff",
+    meta: "rgba(255,255,255,0.58)",
+    badge: "rgba(7,8,10,0.76)",
+    badgeGlyph: "#ffffff",
+    button: "rgba(255,255,255,0.92)",
+    buttonInk: "#17191e",
+    border: "rgba(255,255,255,0.08)",
+    shadow: "0 4px 12px rgba(8,10,14,0.11)",
+  },
+};
+
+const STACK_LAYERS = [
+  {
+    top: -16,
+    inset: 10,
+    rotate: 7,
+    x: 14,
+    scaleX: 0.97,
+    opacity: 0.2,
+    blur: 3.5,
+    duration: 9.6,
+    driftX: 3,
+    driftY: 3,
+  },
+  {
+    top: -10,
+    inset: 6,
+    rotate: -5.5,
+    x: -12,
+    scaleX: 0.978,
+    opacity: 0.32,
+    blur: 2.3,
+    duration: 8.4,
+    driftX: -3,
+    driftY: 2,
+  },
+  {
+    top: -5,
+    inset: 3,
+    rotate: 4,
+    x: 8,
+    scaleX: 0.986,
+    opacity: 0.46,
+    blur: 1.4,
+    duration: 7.4,
+    driftX: 2,
+    driftY: 1.5,
+  },
+  {
+    top: 0,
+    inset: 1,
+    rotate: -2.8,
+    x: -4,
+    scaleX: 0.995,
+    opacity: 0.64,
+    blur: 0.6,
+    duration: 6.4,
+    driftX: -1.5,
+    driftY: 1,
+  },
+] as const;
+
+function useImageTone(src: string, preferred?: FlowCardTone) {
+  const [tone, setTone] = useState<FlowCardTone>(preferred ?? "graphite");
+
+  useEffect(() => {
+    if (preferred) {
+      setTone(preferred);
+      return;
+    }
+
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 20;
+      canvas.height = 20;
+      const context = canvas.getContext("2d", { willReadFrequently: true });
+      if (!context) return;
+      context.drawImage(image, 0, 0, 20, 20);
+
+      try {
+        const pixels = context.getImageData(0, 0, 20, 20).data;
+        let red = 0;
+        let green = 0;
+        let blue = 0;
+        let count = 0;
+        for (let index = 0; index < pixels.length; index += 16) {
+          if (pixels[index + 3] < 96) continue;
+          red += pixels[index];
+          green += pixels[index + 1];
+          blue += pixels[index + 2];
+          count += 1;
+        }
+        if (!count) return;
+        red /= count;
+        green /= count;
+        blue /= count;
+        const max = Math.max(red, green, blue);
+        const min = Math.min(red, green, blue);
+        const saturation = max === 0 ? 0 : (max - min) / max;
+        const luminance = red * 0.2126 + green * 0.7152 + blue * 0.0722;
+
+        if (blue > red + 12 && blue > green + 5 && saturation > 0.2) setTone("blue");
+        else if (luminance > 168 && saturation < 0.32) setTone("mist");
+        else setTone("graphite");
+      } catch {
+        setTone("graphite");
+      }
+    };
+    image.src = src;
+    return () => {
+      image.onload = null;
+    };
+  }, [preferred, src]);
+
+  return CARD_TONES[tone];
+}
+
 /**
- * ProjectCard — blue-immersive card: cover photo inset on top,
- * saturated blue title bar below, stacking layers behind based on nodeCount.
+ * ProjectCard — 节点越多，卡片越像一组正在生长的半透明内容切片。
+ * 层叠层只使用选定的单色，不复制封面；主表面收敛到蓝 / 冷灰 / 石墨黑三档。
  */
 export function ProjectCard({ project, nodeCount }: { project: FlowProject; nodeCount: number }) {
   const { state, dispatch } = useFlowStore();
@@ -21,11 +176,13 @@ export function ProjectCard({ project, nodeCount }: { project: FlowProject; node
   const eng = state.engagement[project.id];
   const playingThis = isCurrent(project.sourceNodeId);
   const dur = source?.media.find((m) => m.kind === "sound")?.duration ?? 60;
+  const reduceMotion = useReducedMotion();
+  const tone = useImageTone(project.cover, project.visualTone);
 
-  // 0 = solo; 1–3 = stacking tiers
-  const tiers = nodeCount >= 9 ? 3 : nodeCount >= 5 ? 2 : nodeCount >= 2 ? 1 : 0;
-  // paddingBottom exposes the layer edges below the main card
-  const pb = tiers === 3 ? 16 : tiers === 2 ? 11 : tiers === 1 ? 7 : 0;
+  // 子节点越多，露出的洋葱皮片层越多：2 / 3 / 4 层。
+  const layerCount = nodeCount >= 9 ? 4 : nodeCount >= 5 ? 3 : nodeCount >= 2 ? 2 : 0;
+  const visibleLayers = STACK_LAYERS.slice(STACK_LAYERS.length - layerCount);
+  const pb = layerCount * 10;
 
   return (
     <motion.div
@@ -36,51 +193,44 @@ export function ProjectCard({ project, nodeCount }: { project: FlowProject; node
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
     >
-
-      {/* Layer 3 — furthest back */}
-      {tiers >= 3 && (
-        <div
+      {visibleLayers.map((layer, index) => (
+        <motion.div
+          key={`${project.id}-onion-${index}`}
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 rounded-3xl"
+          className="pointer-events-none absolute rounded-[28px]"
           style={{
-            top: 12, bottom: 0,
-            background: "var(--flow-blue)",
-            opacity: 0.38,
-            transform: "rotate(3deg) translateX(3px) scaleX(0.952)",
+            top: layer.top,
+            bottom: index * 10,
+            left: layer.inset,
+            right: layer.inset,
+            backgroundColor: tone.surface,
+            filter: `blur(${layer.blur}px)`,
+            opacity: layer.opacity,
+            transformOrigin: "center center",
           }}
+          initial={{ rotate: layer.rotate, x: layer.x, scaleX: layer.scaleX }}
+          animate={
+            reduceMotion
+              ? undefined
+              : {
+                  rotate: [layer.rotate, layer.rotate * 0.72, layer.rotate],
+                  x: [layer.x, layer.x + layer.driftX, layer.x],
+                  y: [0, layer.driftY, 0],
+                }
+          }
+          transition={{ duration: layer.duration, ease: "easeInOut", repeat: Infinity }}
         />
-      )}
-      {/* Layer 2 — middle */}
-      {tiers >= 2 && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 rounded-3xl"
-          style={{
-            top: 7, bottom: 0,
-            background: "var(--flow-blue)",
-            opacity: 0.56,
-            transform: "rotate(-2.5deg) translateX(-3px) scaleX(0.966)",
-          }}
-        />
-      )}
-      {/* Layer 1 — nearest */}
-      {tiers >= 1 && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 rounded-3xl"
-          style={{
-            top: 3, bottom: 0,
-            background: "var(--flow-blue)",
-            opacity: 0.74,
-            transform: "rotate(1.8deg) translateX(2px) scaleX(0.978)",
-          }}
-        />
-      )}
+      ))}
 
       {/* Main card */}
       <motion.article
         className="relative z-10 cursor-pointer overflow-hidden rounded-3xl"
-        style={{ background: "var(--flow-blue)" }}
+        style={{
+          background: tone.surface,
+          color: tone.ink,
+          border: `1px solid ${tone.border}`,
+          boxShadow: tone.shadow,
+        }}
         role="button"
         tabIndex={0}
         aria-label={`查看 ${project.title}`}
@@ -104,9 +254,9 @@ export function ProjectCard({ project, nodeCount }: { project: FlowProject; node
           {/* Flow-type badge */}
           <span
             className="pointer-events-none absolute left-2.5 top-2.5 grid size-8 place-items-center rounded-xl"
-            style={{ background: "var(--flow-blue)" }}
+            style={{ background: tone.badge }}
           >
-            <FlowGlyph kind="flow" size={18} />
+            <FlowGlyph kind="flow" size={18} color={tone.badgeGlyph} />
           </span>
           {/* Play button */}
           <button
@@ -123,23 +273,23 @@ export function ProjectCard({ project, nodeCount }: { project: FlowProject; node
               });
             }}
             className="absolute bottom-2.5 right-2.5 grid size-10 place-items-center rounded-full active:scale-90"
-            style={{ background: "rgba(255,255,255,0.92)" }}
+            style={{ background: tone.button }}
           >
             {playingThis ? (
-              <Pause size={16} color="var(--flow-blue)" fill="var(--flow-blue)" />
+              <Pause size={16} color={tone.buttonInk} fill={tone.buttonInk} />
             ) : (
-              <Play size={16} color="var(--flow-blue)" fill="var(--flow-blue)" />
+              <Play size={16} color={tone.buttonInk} fill={tone.buttonInk} />
             )}
           </button>
         </div>
 
         {/* Blue title + meta strip */}
         <div className="px-4 pb-3.5 pt-2.5">
-          <h3 className="text-[17px] font-bold leading-snug text-white">{project.title}</h3>
+          <h3 className="text-[17px] font-bold leading-snug" style={{ color: tone.ink }}>{project.title}</h3>
           <div className="mt-1.5 flex items-center justify-between gap-2">
             <div
               className="flex min-w-0 items-center gap-1.5 text-[12px]"
-              style={{ color: "rgba(255,255,255,0.62)" }}
+              style={{ color: tone.meta }}
             >
               {owner && (
                 <ImageWithFallback
@@ -165,7 +315,7 @@ export function ProjectCard({ project, nodeCount }: { project: FlowProject; node
                   nav.push({ name: "flowMap", flowId: project.id });
                 }}
                 className="flex items-center gap-1 text-[12px] font-medium"
-                style={{ color: "rgba(255,255,255,0.80)" }}
+                style={{ color: tone.ink, opacity: 0.78 }}
               >
                 <GitBranch size={13} />
                 {nodeCount}
@@ -179,7 +329,7 @@ export function ProjectCard({ project, nodeCount }: { project: FlowProject; node
                   dispatch({ type: "toggleLike", id: project.id });
                 }}
                 className="flex items-center gap-1 text-[12px]"
-                style={{ color: eng?.liked ? "var(--flow-yellow)" : "rgba(255,255,255,0.62)" }}
+                style={{ color: eng?.liked ? "var(--flow-yellow)" : tone.meta }}
               >
                 <Heart
                   size={13}

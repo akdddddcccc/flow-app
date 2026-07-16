@@ -5,8 +5,12 @@ import shengAvatar from "../../assets/content/avatars/sheng.jpg";
 import aqueenAvatar from "../../assets/content/avatars/aqueen.jpg";
 import yellowSongCover from "../../assets/content/covers/yellow-song-cover.jpg";
 import cityLightsCover from "../../assets/content/covers/city-lights-cover.jpg";
+import romanticBlueSource from "../../assets/content/covers/romantic-blue-source.jpg";
+import mixedColorSource from "../../assets/content/covers/mixed-color-source.jpg";
 import mondrianGroove from "../../assets/content/fragments/mondrian-groove.jpg";
 import mondrianFragment from "../../assets/content/fragments/mondrian-fragment.jpg";
+import romanticSketch from "../../assets/content/fragments/romantic-sketch.jpg";
+import thinkerAvatar from "../../assets/content/avatars/thinker.jpg";
 
 // 所有展示素材都打包进项目，避免作品集上线后依赖第三方图片外链。
 const IMAGE_ASSETS: Record<string, string> = {
@@ -18,6 +22,10 @@ const IMAGE_ASSETS: Record<string, string> = {
   "mondrian-fragment": mondrianFragment,
   "yellow-song-cover": yellowSongCover,
   "city-lights-cover": cityLightsCover,
+  "romantic-blue-source": romanticBlueSource,
+  "mixed-color-source": mixedColorSource,
+  "romantic-sketch": romanticSketch,
+  "thinker-avatar": thinkerAvatar,
 };
 const IMG = (slug: string, _w = 900, _h?: number) => IMAGE_ASSETS[slug] ?? yellowSongCover;
 
@@ -35,7 +43,10 @@ const mainNodes: FlowNode[] = [
     roles: ["编曲"],
     title: "源 · little yellow beat",
     changeNote: "一段 lo-fi 四拍节奏，想做成一首温暖的小情歌。",
-    media: [{ kind: "sound", duration: 48 }],
+    media: [
+      { kind: "sound", duration: 48 },
+      { kind: "pic", src: IMG("romantic-sketch", 900, 675) },
+    ],
     fragmentRefs: ["frag-drum"], // 虚线：引用鼓点碎片
     createdAt: now - 20 * DAY,
   },
@@ -64,7 +75,7 @@ const mainNodes: FlowNode[] = [
     changeNote: "写了主歌和副歌，主题是「像小黄花一样想你」。",
     media: [
       { kind: "sound", duration: 66 },
-      { kind: "text", text: "像小黄花一样，在风里想你……" },
+      { kind: "text", text: "在人潮中缓慢地换气，缓慢地遇见，缓慢又热烈地爱上对方。" },
     ],
     fragmentRefs: ["frag-text"],
     createdAt: now - 15 * DAY,
@@ -205,6 +216,79 @@ const proj2Nodes: FlowNode[] = [
   },
 ];
 
+// 旧稿中「mixed color」图片与文字的关联仍然成立：它从视觉碎片长成节奏与影像。
+const mixedColorNodes: FlowNode[] = [
+  {
+    id: "x1",
+    flowId: "p3",
+    parentId: null,
+    kind: "source",
+    authorId: "thinker",
+    roles: ["视觉"],
+    title: "源 · mixed color",
+    changeNote: "黑、黄、红的碰撞，把复杂情绪压缩成直接的色感。",
+    media: [{ kind: "pic", src: IMG("mixed-color-source", 900, 1200) }],
+    fragmentRefs: ["frag-pic"],
+    createdAt: now - 13 * DAY,
+  },
+  {
+    id: "x2",
+    flowId: "p3",
+    parentId: "x1",
+    kind: "flow",
+    authorId: "sheng",
+    roles: ["编曲"],
+    title: "把色块切成节奏",
+    changeNote: "用三个主色对应三组鼓点，让画面的冲突变成 beat。",
+    media: [{ kind: "sound", duration: 54 }],
+    fragmentRefs: [],
+    createdAt: now - 11 * DAY,
+  },
+  {
+    id: "x3",
+    flowId: "p3",
+    parentId: "x1",
+    kind: "flow",
+    authorId: "ayon",
+    roles: ["视觉", "混音"],
+    title: "低饱和影像版",
+    changeNote: "保留原图的流动方向，把颜色压暗，声音换成更克制的 texture。",
+    media: [{ kind: "sound", duration: 67 }],
+    fragmentRefs: [],
+    createdAt: now - 9 * DAY,
+  },
+  {
+    id: "x4",
+    flowId: "p3",
+    parentId: "x2",
+    kind: "flow",
+    authorId: "aqueen",
+    roles: ["演唱", "混音"],
+    title: "完成 · Color rhythm",
+    changeNote: "加入切片人声，让色彩变化与呼吸节奏对齐。",
+    media: [{ kind: "sound", duration: 142 }],
+    fragmentRefs: [],
+    completed: true,
+    completedLabel: "Color rhythm",
+    createdAt: now - 6 * DAY,
+  },
+  {
+    id: "x5",
+    flowId: "p3",
+    parentId: "x3",
+    kind: "flow",
+    authorId: "thinker",
+    roles: ["视觉"],
+    title: "完成 · Afterimage",
+    changeNote: "用残影和慢速位移做成可循环的封面动画。",
+    media: [{ kind: "pic", src: IMG("mixed-color-source", 900, 1200) }],
+    fragmentRefs: [],
+    completed: true,
+    completedLabel: "Afterimage",
+    createdAt: now - 3 * DAY,
+  },
+];
+
 function keyBy<T extends { id: string }>(arr: T[]): Record<string, T> {
   return Object.fromEntries(arr.map((x) => [x.id, x]));
 }
@@ -250,6 +334,15 @@ export function createSeedState(): AppState {
         roles: ["混音", "演唱"],
         followingIds: ["ayon", "chen"],
       },
+      {
+        id: "thinker",
+        name: "Thinker",
+        handle: "@thinker.visual",
+        avatar: IMG("thinker-avatar", 200, 200),
+        bio: "把颜色、图像与声音放进同一条流里",
+        roles: ["视觉", "编曲"],
+        followingIds: ["sheng", "chen"],
+      },
     ]),
     fragments: keyBy([
       {
@@ -270,17 +363,25 @@ export function createSeedState(): AppState {
         id: "frag-text",
         authorId: "ayon",
         title: "一句歌词灵感",
-        media: { kind: "text", text: "「像小黄花一样，在风里想你」" },
+        media: { kind: "text", text: "「在人潮中缓慢地换气，缓慢地遇见。」" },
         createdAt: now - 19 * DAY,
+      },
+      {
+        id: "frag-sketch",
+        authorId: "chen",
+        title: "陌生城市里的两个人",
+        media: { kind: "pic", src: IMG("romantic-sketch", 900, 675) },
+        createdAt: now - 18 * DAY,
       },
     ]),
     projects: keyBy([
       {
         id: "p1",
         title: "Romantic little yellow song",
-        cover: IMG("yellow-song-cover", 900, 540),
+        cover: IMG("romantic-blue-source", 900, 1200),
+        visualTone: "blue",
         description:
-          "一段温暖的小情歌，从一个 lo-fi beat 开始，欢迎不同角色的音乐人续流，长出属于自己的版本。",
+          "这个 beat 有很强的宇宙感和迷茫感。两个灵魂在人潮中缓慢遇见，再由不同音乐人续成长出新的版本。",
         license: "attribution",
         ownerId: "chen",
         sourceNodeId: "n1",
@@ -293,6 +394,7 @@ export function createSeedState(): AppState {
         id: "p2",
         title: "City Lights, Fading",
         cover: IMG("city-lights-cover", 900, 540),
+        visualTone: "mist",
         description: "夜跑时的 synthwave 小样。仅展示，暂不开放续作。",
         license: "display-only",
         ownerId: "ayon",
@@ -302,8 +404,22 @@ export function createSeedState(): AppState {
         saves: 33,
         createdAt: now - 8 * DAY,
       },
+      {
+        id: "p3",
+        title: "mixed color",
+        cover: IMG("mixed-color-source", 900, 1200),
+        visualTone: "graphite",
+        description: "黑、黄、红在同一张图里互相推挤。它从一块视觉碎片出发，被续成节奏、声音与循环影像。",
+        license: "attribution",
+        ownerId: "thinker",
+        sourceNodeId: "x1",
+        tags: ["视觉", "实验", "art-pop"],
+        likes: 247,
+        saves: 71,
+        createdAt: now - 13 * DAY,
+      },
     ]),
-    nodes: keyBy([...mainNodes, ...proj2Nodes]),
+    nodes: keyBy([...mainNodes, ...proj2Nodes, ...mixedColorNodes]),
     comments: [
       { id: "c1", targetId: "p1", authorId: "ayon", text: "这个 beat 太上头了，我来加编曲！", createdAt: now - 17 * DAY },
       { id: "c2", targetId: "p1", authorId: "sheng", text: "副歌词我已经在写了 👀", createdAt: now - 15 * DAY },
@@ -311,6 +427,8 @@ export function createSeedState(): AppState {
       { id: "c4", targetId: "p1", authorId: "chen", text: "没想到还能长出游戏化版本，太有意思了。", createdAt: now - 4 * DAY },
       { id: "c5", targetId: "frag-pic", authorId: "chen", text: "这个色块可以做成 MV 视觉。", createdAt: now - 20 * DAY },
       { id: "c6", targetId: "p2", authorId: "sheng", text: "求开放续作，我想加人声！", createdAt: now - 6 * DAY },
+      { id: "c7", targetId: "p3", authorId: "sheng", text: "这种色彩像一段有规律的鼓点。", createdAt: now - 10 * DAY },
+      { id: "c8", targetId: "p3", authorId: "ayon", text: "我想把画面的流动方向做成声像移动。", createdAt: now - 8 * DAY },
     ],
     drafts: keyBy([
       {

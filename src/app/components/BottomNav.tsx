@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
+import { TrendingUp, type LucideIcon } from "lucide-react";
 import { useNav, type Screen } from "../nav";
-import homeIcon from "../../assets/figma-bottom-nav/home-icon.svg";
 import discoverIcon from "../../assets/figma-bottom-nav/discover-icon.svg";
 import createButton from "../../assets/figma-bottom-nav/create-button.svg";
 import profileIcon from "../../assets/figma-bottom-nav/profile-icon.svg";
@@ -8,7 +8,8 @@ import profileIcon from "../../assets/figma-bottom-nav/profile-icon.svg";
 type TabDef = {
   name: "home" | "discover" | "profile";
   label: string;
-  icon: string;
+  icon?: string;
+  Icon?: LucideIcon;
   center: string;
   nodeId: string;
 };
@@ -19,7 +20,7 @@ type TabDef = {
  * 发布按钮固定在 62.5% 位置，并使用原始 141×123 矢量资产。
  */
 const TABS: TabDef[] = [
-  { name: "home", label: "首页", icon: homeIcon, center: "14.360465%", nodeId: "582:169" },
+  { name: "home", label: "热流", Icon: TrendingUp, center: "14.360465%", nodeId: "582:169" },
   { name: "discover", label: "发现", icon: discoverIcon, center: "39.360465%", nodeId: "582:175" },
   { name: "profile", label: "我的", icon: profileIcon, center: "85.639535%", nodeId: "582:185" },
 ];
@@ -77,21 +78,21 @@ function TabBtn({ tab, active }: { tab: TabDef; active: boolean }) {
       transition={{ type: "spring", stiffness: 520, damping: 32 }}
       data-node-id={tab.nodeId}
     >
-      <img
-        src={tab.icon}
-        alt=""
-        aria-hidden="true"
-        className="size-[22px] shrink-0"
-        style={{
-          filter: active
-            ? tab.name === "home"
-              ? "none"
-              : "brightness(0) saturate(100%) invert(30%) sepia(99%) saturate(4100%) hue-rotate(229deg) brightness(91%) contrast(107%)"
-            : tab.name === "home"
-              ? "grayscale(1) opacity(0.64)"
+      {tab.Icon ? (
+        <tab.Icon size={22} strokeWidth={2.35} aria-hidden="true" />
+      ) : (
+        <img
+          src={tab.icon}
+          alt=""
+          aria-hidden="true"
+          className="size-[22px] shrink-0"
+          style={{
+            filter: active
+              ? "brightness(0) saturate(100%) invert(30%) sepia(99%) saturate(4100%) hue-rotate(229deg) brightness(91%) contrast(107%)"
               : "none",
-        }}
-      />
+          }}
+        />
+      )}
       <span className="font-medium leading-[15px]">{tab.label}</span>
     </motion.button>
   );

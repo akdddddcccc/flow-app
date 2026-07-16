@@ -11,34 +11,32 @@ const STORAGE_KEY = "flow.app.store.v1";
 
 function refreshBundledAssets(state: AppState): AppState {
   const seed = createSeedState();
-  const users = { ...state.users };
-  for (const id of ["chen", "ayon", "sheng", "aqueen"]) {
-    if (users[id] && seed.users[id]) {
-      users[id] = { ...users[id], avatar: seed.users[id].avatar };
-    }
+  const users = { ...seed.users, ...state.users };
+  const projects = { ...seed.projects, ...state.projects };
+  const fragments = { ...seed.fragments, ...state.fragments };
+  const nodes = { ...seed.nodes, ...state.nodes };
+
+  // 内置演示内容跟随版本更新；用户自己发布的项目、节点和草稿继续保留。
+  for (const id of Object.keys(seed.users)) {
+    users[id] = { ...(state.users[id] ?? {}), ...seed.users[id] };
+  }
+  for (const id of Object.keys(seed.projects)) {
+    projects[id] = { ...(state.projects[id] ?? {}), ...seed.projects[id] };
+  }
+  for (const id of Object.keys(seed.fragments)) {
+    fragments[id] = { ...(state.fragments[id] ?? {}), ...seed.fragments[id] };
+  }
+  for (const id of Object.keys(seed.nodes)) {
+    nodes[id] = { ...(state.nodes[id] ?? {}), ...seed.nodes[id] };
   }
 
-  const projects = { ...state.projects };
-  for (const id of ["p1", "p2"]) {
-    if (projects[id] && seed.projects[id]) {
-      projects[id] = { ...projects[id], cover: seed.projects[id].cover };
-    }
-  }
+  const knownCommentIds = new Set(state.comments.map((comment) => comment.id));
+  const comments = [
+    ...state.comments,
+    ...seed.comments.filter((comment) => !knownCommentIds.has(comment.id)),
+  ];
 
-  const fragments = { ...state.fragments };
-  if (fragments["frag-pic"] && seed.fragments["frag-pic"]) {
-    fragments["frag-pic"] = {
-      ...fragments["frag-pic"],
-      media: seed.fragments["frag-pic"].media,
-    };
-  }
-
-  const nodes = { ...state.nodes };
-  if (nodes.n3 && seed.nodes.n3) {
-    nodes.n3 = { ...nodes.n3, media: seed.nodes.n3.media };
-  }
-
-  return { ...state, users, projects, fragments, nodes };
+  return { ...state, users, projects, fragments, nodes, comments };
 }
 
 export function loadState(): AppState {
