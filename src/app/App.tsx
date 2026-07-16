@@ -64,7 +64,7 @@ export default function App() {
             data-embed={isPortfolioEmbed ? "portfolio" : "standalone"}
           >
             <div
-              className="flow-app-shell relative flex w-full max-w-[430px] flex-col overflow-hidden bg-white font-[Inter] text-black"
+              className="flow-app-shell relative flex w-full max-w-[430px] flex-col overflow-hidden bg-white font-sans text-black"
             >
               <Shell />
             </div>
