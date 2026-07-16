@@ -1,19 +1,28 @@
-import { Home, Compass, Plus, User } from "lucide-react";
+import { motion } from "motion/react";
 import { useNav, type Screen } from "../nav";
+import homeIcon from "../../assets/figma-bottom-nav/home-icon.svg";
+import discoverIcon from "../../assets/figma-bottom-nav/discover-icon.svg";
+import createButton from "../../assets/figma-bottom-nav/create-button.svg";
+import profileIcon from "../../assets/figma-bottom-nav/profile-icon.svg";
 
-type TabDef = { name: "home" | "discover" | "profile"; label: string; icon: typeof Home };
-
-const TABS_LEFT: TabDef[] = [
-  { name: "home", label: "首页", icon: Home },
-  { name: "discover", label: "发现", icon: Compass },
-];
+type TabDef = {
+  name: "home" | "discover" | "profile";
+  label: string;
+  icon: string;
+  center: string;
+  nodeId: string;
+};
 
 /**
- * 原稿中的液态发布按钮：上方是圆角水滴头，下方通过两侧凹曲线
- * 与导航栏底边连成一个整体。
+ * 直接对应 Figma `test_function` 节点 582:168。
+ * 这里刻意不是四等分居中：原稿对三个普通 Tab 做了 8px 的光学校正，
+ * 发布按钮固定在 62.5% 位置，并使用原始 141×123 矢量资产。
  */
-const DROP_PATH =
-  "M 28 0 H 68 C 76 0 82 6 82 14 V 39 C 82 57 88 68 96 72 H 0 C 8 68 14 57 14 39 V 14 C 14 6 20 0 28 0 Z";
+const TABS: TabDef[] = [
+  { name: "home", label: "首页", icon: homeIcon, center: "14.360465%", nodeId: "582:169" },
+  { name: "discover", label: "发现", icon: discoverIcon, center: "39.360465%", nodeId: "582:175" },
+  { name: "profile", label: "我的", icon: profileIcon, center: "85.639535%", nodeId: "582:185" },
+];
 
 export function BottomNav() {
   const nav = useNav();
@@ -21,65 +30,69 @@ export function BottomNav() {
 
   return (
     <nav
-      className="border-t border-black/5 bg-white/95 backdrop-blur"
-      style={{ height: 72 }}
+      className="relative z-20 shrink-0 overflow-visible border-t border-black/5 bg-white/95 backdrop-blur"
+      style={{ height: 63 }}
+      data-node-id="582:168"
     >
-      {/* Three-column grid: [left tabs | 96px center | right tab] */}
-      <div className="grid h-full" style={{ gridTemplateColumns: "1fr 96px 1fr" }}>
+      <TabBtn tab={TABS[0]} active={rootName === "home"} />
+      <TabBtn tab={TABS[1]} active={rootName === "discover"} />
 
-        {/* Left: home + discover */}
-        <div className="flex items-center justify-around">
-          {TABS_LEFT.map((t) => (
-            <TabBtn key={t.name} tab={t} active={rootName === t.name} />
-          ))}
-        </div>
+      <motion.button
+        type="button"
+        onClick={() => nav.push({ name: "createEntry" })}
+        aria-label="创作"
+        className="absolute top-[-1px] h-16 w-[117px] -translate-x-1/2 overflow-visible"
+        style={{ left: "62.5%" }}
+        whileTap={{ scale: 0.96 }}
+        transition={{ type: "spring", stiffness: 500, damping: 32 }}
+        data-node-id="582:181"
+      >
+        <img
+          src={createButton}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute left-1/2 top-[-5px] h-[123px] w-[141px] max-w-none -translate-x-1/2"
+        />
+      </motion.button>
 
-        {/* Center: water-drop publish button fills full column height */}
-        <div className="relative flex items-stretch">
-          <button
-            type="button"
-            onClick={() => nav.push({ name: "createEntry" })}
-            aria-label="创作"
-            className="relative flex w-full flex-col items-center justify-center pb-1 text-white active:scale-95"
-            style={{ background: "none", border: "none", cursor: "pointer" }}
-          >
-            <svg
-              viewBox="0 0 96 72"
-              className="absolute inset-0 h-full w-full"
-              preserveAspectRatio="none"
-              aria-hidden
-            >
-              <path d={DROP_PATH} fill="var(--flow-blue)" />
-            </svg>
-            <Plus size={27} strokeWidth={1.8} className="relative z-10" />
-          </button>
-        </div>
-
-        {/* Right: profile */}
-        <div className="flex items-center justify-center">
-          <TabBtn
-            tab={{ name: "profile", label: "我的", icon: User }}
-            active={rootName === "profile"}
-          />
-        </div>
-      </div>
+      <TabBtn tab={TABS[2]} active={rootName === "profile"} />
     </nav>
   );
 }
 
 function TabBtn({ tab, active }: { tab: TabDef; active: boolean }) {
   const nav = useNav();
-  const Icon = tab.icon;
+
   return (
-    <button
+    <motion.button
       type="button"
       onClick={() => nav.resetTo({ name: tab.name } as Screen)}
       aria-current={active ? "page" : undefined}
-      className="flex flex-col items-center gap-0.5 px-4 py-2 text-[10px]"
-      style={{ color: active ? "var(--flow-blue)" : "var(--flow-muted)" }}
+      className="absolute top-[6.5px] flex h-[47px] w-16 -translate-x-1/2 flex-col items-center gap-0.5 py-1 text-[10px]"
+      style={{
+        left: tab.center,
+        color: active ? "var(--flow-blue)" : "var(--flow-muted)",
+      }}
+      whileTap={{ scale: 0.92 }}
+      transition={{ type: "spring", stiffness: 520, damping: 32 }}
+      data-node-id={tab.nodeId}
     >
-      <Icon size={22} strokeWidth={active ? 2.4 : 2} />
-      {tab.label}
-    </button>
+      <img
+        src={tab.icon}
+        alt=""
+        aria-hidden="true"
+        className="size-[22px] shrink-0"
+        style={{
+          filter: active
+            ? tab.name === "home"
+              ? "none"
+              : "brightness(0) saturate(100%) invert(30%) sepia(99%) saturate(4100%) hue-rotate(229deg) brightness(91%) contrast(107%)"
+            : tab.name === "home"
+              ? "grayscale(1) opacity(0.64)"
+              : "none",
+        }}
+      />
+      <span className="font-medium leading-[15px]">{tab.label}</span>
+    </motion.button>
   );
 }

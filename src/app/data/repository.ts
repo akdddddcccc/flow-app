@@ -9,6 +9,38 @@ import { createSeedState } from "./seed";
 // 独立命名空间，避免作为 iframe 嵌入作品集时与宿主站点的数据冲突。
 const STORAGE_KEY = "flow.app.store.v1";
 
+function refreshBundledAssets(state: AppState): AppState {
+  const seed = createSeedState();
+  const users = { ...state.users };
+  for (const id of ["chen", "ayon", "sheng", "aqueen"]) {
+    if (users[id] && seed.users[id]) {
+      users[id] = { ...users[id], avatar: seed.users[id].avatar };
+    }
+  }
+
+  const projects = { ...state.projects };
+  for (const id of ["p1", "p2"]) {
+    if (projects[id] && seed.projects[id]) {
+      projects[id] = { ...projects[id], cover: seed.projects[id].cover };
+    }
+  }
+
+  const fragments = { ...state.fragments };
+  if (fragments["frag-pic"] && seed.fragments["frag-pic"]) {
+    fragments["frag-pic"] = {
+      ...fragments["frag-pic"],
+      media: seed.fragments["frag-pic"].media,
+    };
+  }
+
+  const nodes = { ...state.nodes };
+  if (nodes.n3 && seed.nodes.n3) {
+    nodes.n3 = { ...nodes.n3, media: seed.nodes.n3.media };
+  }
+
+  return { ...state, users, projects, fragments, nodes };
+}
+
 export function loadState(): AppState {
   if (typeof window === "undefined") return createSeedState();
   try {
@@ -24,7 +56,9 @@ export function loadState(): AppState {
       saveState(seeded);
       return seeded;
     }
-    return parsed;
+    const refreshed = refreshBundledAssets(parsed);
+    saveState(refreshed);
+    return refreshed;
   } catch {
     return createSeedState();
   }

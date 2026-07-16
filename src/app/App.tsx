@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { Toaster } from "sonner";
+import { AnimatePresence, MotionConfig, motion, useReducedMotion } from "motion/react";
 import { FlowStoreProvider } from "./data/store";
-import { NavProvider, useNav } from "./nav";
+import { NavProvider, useNav, type Screen } from "./nav";
 import { PlayerProvider } from "./player";
 import { BottomNav } from "./components/BottomNav";
 import { MiniPlayer } from "./components/player/Players";
@@ -14,30 +15,77 @@ import { DetailScreen } from "./components/screens/DetailScreen";
 import { FlowMapScreen } from "./components/screens/FlowMapScreen";
 import { ContinueFlowScreen } from "./components/screens/ContinueFlowScreen";
 
-function CurrentScreen() {
-  const { current } = useNav();
-  switch (current.name) {
+function CurrentScreen({ screen }: { screen: Screen }) {
+  switch (screen.name) {
     case "home": return <HomeScreen />;
     case "discover": return <DiscoverScreen />;
     case "profile": return <ProfileScreen />;
     case "drafts": return <DraftsScreen />;
     case "createEntry": return <CreateEntryScreen />;
-    case "detail": return <DetailScreen targetId={current.targetId} />;
-    case "flowMap": return <FlowMapScreen flowId={current.flowId} focusNodeId={current.focusNodeId} />;
-    case "continueFlow": return <ContinueFlowScreen flowId={current.flowId} parentNodeId={current.parentNodeId} draftId={current.draftId} />;
+    case "detail": return <DetailScreen targetId={screen.targetId} />;
+    case "flowMap": return <FlowMapScreen flowId={screen.flowId} focusNodeId={screen.focusNodeId} />;
+    case "continueFlow": return <ContinueFlowScreen flowId={screen.flowId} parentNodeId={screen.parentNodeId} draftId={screen.draftId} />;
     default: return <HomeScreen />;
   }
 }
 
+function screenIdentity(screen: Screen) {
+  switch (screen.name) {
+    case "detail": return `detail-${screen.targetId}`;
+    case "flowMap": return `flow-${screen.flowId}-${screen.focusNodeId ?? "root"}`;
+    case "continueFlow": return `continue-${screen.flowId}-${screen.parentNodeId}-${screen.draftId ?? "new"}`;
+    default: return screen.name;
+  }
+}
+
+const screenVariants = {
+  enter: ({ direction, kind }: { direction: number; kind: string }) => ({
+    opacity: 0,
+    x: kind === "tab" ? direction * 14 : direction * 24,
+    y: kind === "tab" ? 5 : 0,
+    scale: kind === "tab" ? 1 : 0.992,
+  }),
+  center: {
+    opacity: 1,
+    x: 0,
+    y: 0,
+    scale: 1,
+  },
+  exit: ({ direction, kind }: { direction: number; kind: string }) => ({
+    opacity: 0,
+    x: kind === "tab" ? direction * -10 : direction * -16,
+    y: kind === "tab" ? -3 : 0,
+    scale: kind === "tab" ? 1 : 0.996,
+  }),
+};
+
 function Shell() {
-  const { current } = useNav();
+  const { current, motion: navMotion } = useNav();
+  const reduceMotion = useReducedMotion();
   // 全屏沉浸式屏幕（自带顶部返回栏）隐藏底部 Tab
   const immersive = current.name === "continueFlow" || current.name === "flowMap" || current.name === "detail";
 
   return (
     <div className="relative flex h-full min-h-0 flex-1 flex-col overflow-hidden">
       <div className="relative min-h-0 flex-1 overflow-hidden">
-        <CurrentScreen />
+        <AnimatePresence initial={false} mode="sync" custom={navMotion}>
+          <motion.div
+            key={`${screenIdentity(current)}-${navMotion.sequence}`}
+            className="absolute inset-0"
+            data-screen-transition={screenIdentity(current)}
+            custom={navMotion}
+            variants={reduceMotion ? undefined : screenVariants}
+            initial={reduceMotion ? false : "enter"}
+            animate={reduceMotion ? undefined : "center"}
+            exit={reduceMotion ? undefined : "exit"}
+            transition={{
+              duration: navMotion.kind === "tab" ? 0.24 : 0.3,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+          >
+            <CurrentScreen screen={current} />
+          </motion.div>
+        </AnimatePresence>
       </div>
       <MiniPlayer />
       {!immersive && <BottomNav />}
@@ -57,21 +105,23 @@ export default function App() {
 
   return (
     <FlowStoreProvider>
-      <PlayerProvider>
-        <NavProvider>
-          <div
-            className="flow-stage flex w-full items-center justify-center"
-            data-embed={isPortfolioEmbed ? "portfolio" : "standalone"}
-          >
+      <MotionConfig reducedMotion="user">
+        <PlayerProvider>
+          <NavProvider>
             <div
-              className="flow-app-shell relative flex w-full max-w-[430px] flex-col overflow-hidden bg-white font-sans text-black"
+              className="flow-stage flex w-full items-center justify-center"
+              data-embed={isPortfolioEmbed ? "portfolio" : "standalone"}
             >
-              <Shell />
+              <div
+                className="flow-app-shell relative flex w-full max-w-[430px] flex-col overflow-hidden bg-white font-sans text-black"
+              >
+                <Shell />
+              </div>
+              <Toaster position="top-center" richColors />
             </div>
-            <Toaster position="top-center" richColors />
-          </div>
-        </NavProvider>
-      </PlayerProvider>
+          </NavProvider>
+        </PlayerProvider>
+      </MotionConfig>
     </FlowStoreProvider>
   );
 }
