@@ -59,6 +59,39 @@
 
 final result: passed
 
+## 音频声纹、Apple 式动效与 Flow 品牌图标
+
+- source visual truth: `/var/folders/37/zml8vmpx4fd234rbxq8nr4sr0000gn/T/codex-clipboard-b5fff2c2-7363-42cb-8324-00ac44dc539e.png`
+- source waveform: `/tmp/flow-xd-extract/artwork/artboard-022e0422-d079-4207-8a41-aa23225eb9e5/graphics/graphicContent.agc` 中的 `声波2`
+- source app icon: `/var/folders/37/zml8vmpx4fd234rbxq8nr4sr0000gn/T/codex-clipboard-4e8febb2-3e6f-4f5e-a0fb-4f850a911104.png`
+- implementation screenshots: `qa/apple-motion-sound-waveform-390x844.png`, `qa/apple-motion-filter-sheet-390x844.png`, `qa/apple-motion-home-brand-390x844.png`
+- comparison images: `qa/apple-motion-waveform-comparison.png`, `qa/flow-brand-icon-comparison.png`
+- viewport: 390 × 844 CSS px
+
+### Full-view and focused comparison evidence
+
+- 音频卡片取消右侧声音图标，改为直接从 XD `声波2` 还原的 23 段透明声纹；它贴近卡片底部、低对比显示，不与标题和作者信息争夺注意力。
+- Flow 官方图标保持原图不变，作为 32px 品牌标记放在首页“流.”标题前；同一资源也用于 favicon、Apple Touch Icon 和 PWA manifest。
+- 首页卡片、标题区和底部导航保持原有布局，没有因为品牌标记产生横向挤压。
+
+### Motion and interaction
+
+- motion guidance: Emil Kowalski `apple-design` skill（Apple WWDC 原则：即时按压反馈、可中断弹簧、空间连续性、手势抽屉和 reduced-motion 回退）。
+- 页面 push/pop 改用无缩放的短距离弹簧；局部切换使用更短弹簧，避免 PPT 式整页缩放。
+- 二级分类选中态通过 shared layout 胶囊连续移动；“音乐与声音”由 11 个结果切换到“节奏”后为 5 个结果。
+- 筛选面板支持向下拖动关闭；390 × 844 实测拖动超过阈值后 dialog 数量从 1 变为 0。
+- 播放、卡片和底部 Tab 均提供轻量 press feedback；系统启用 reduced motion 时关闭位移、缩放和声纹呼吸动画。
+
+### Verification
+
+- production build: passed
+- console errors: none
+- broken images: 0 / 9
+- horizontal overflow: none（`innerWidth = 390`, `scrollWidth = 390`）
+- 未发现 P0 / P1 / P2 视觉或交互问题。
+
+final result: passed
+
 ## 紧凑层叠卡片与草稿入口图标
 
 - source visual truth: `/var/folders/37/zml8vmpx4fd234rbxq8nr4sr0000gn/T/codex-clipboard-5531e005-5e5a-41cb-aef3-6ba79395b293.png`
@@ -162,5 +195,68 @@ final result: passed
 2. Earlier finding [P2]: `VideoLibraryOutlined` 被理解为播放库，与“未发布草稿”不符。
    - Fix: 在线核对真实产品后，替换为 Phosphor `FolderOpen`，并同步到个人页、草稿空状态和继续草稿入口。
 3. Post-fix evidence: 默认截图无冗余理由文字；提示截图保持信息可达；个人页截图显示清晰文件夹图标；草稿跳转与四条数据均正常。
+
+final result: passed
+
+## 发现页灵感碎片内容与布局
+
+- source visual truth: `/var/folders/37/zml8vmpx4fd234rbxq8nr4sr0000gn/T/codex-clipboard-b5fff2c2-7363-42cb-8324-00ac44dc539e.png`
+- source content: `/Users/eeo/Desktop/flow app.xd`
+- implementation screenshots: `qa/discover-visual-390x844.png`, `qa/discover-sound-390x844.png`
+- comparison image: `qa/design-comparison.png`
+- viewport: 390 × 844 CSS px
+- states: 发现 / 视觉与绘画；发现 / 音乐与声音
+
+### Full-view comparison evidence
+
+参考稿的两种核心节奏已分别映射到新版界面：视觉结果使用高密度双列图片网格；声音结果使用紧凑的单列播放卡片。实现保留新版 Flow 的浅色设计系统、底部导航和筛选层级，没有照搬旧稿的黑色外壳。
+
+### Required fidelity surfaces
+
+- Fonts and typography: 标题、元数据、结果数量和筛选器层级清晰，在目标视口无裁切。
+- Spacing and layout rhythm: 双列网格与单列音频卡片都使用稳定间距；390px 视口无横向溢出，纵向内容通过移动端滚动继续浏览。
+- Colors and visual tokens: 新增图片保持 XD 原始色彩；音频卡片使用低饱和分类色，继续服从当前 Flow 视觉语言。
+- Image quality and asset fidelity: 从 XD 提取并加入 8 张真实图片素材，没有用占位图或代码绘图替代。
+- Copy and content: 新增 8 个视觉碎片和 8 个声音碎片，标题与旧稿中的作品概念保持关联。
+
+### Interaction and verification
+
+- 分类入口、返回、二级分类、筛选、碎片详情入口与音频加载控制可用。
+- production build: passed
+- console errors: none
+- horizontal overflow: none
+- 未发现 P0 / P1 / P2 视觉问题。
+
+final result: passed
+
+## 首页信息减负
+
+- source visual truth: `/var/folders/37/zml8vmpx4fd234rbxq8nr4sr0000gn/T/codex-clipboard-9917e927-a4c1-40e4-962e-b27a0f19966b.png`
+- implementation screenshot: `qa/home-minimal-390x844.png`
+- comparison image: `qa/home-minimal-comparison.png`
+- viewport: 390 × 844 CSS px
+- state: 首页加载完成
+
+### Full-view and focused comparison evidence
+
+- 原分类胶囊、“热流榜”“持续更新”和项目排名圆点均已删除，首页从品牌标题直接进入内容卡片。
+- 用户提供的软件图标不再出现在界面中；仍作为 favicon、Apple Touch Icon 与 PWA 安装图标保留。
+- 聚焦检查首页顶部与第一张卡片：品牌文字、通知入口、卡片封面、标题和互动数据层级完整，没有因删减产生空洞或错位。
+
+### Required fidelity surfaces
+
+- Fonts and typography: 首页只保留“流.”品牌字样与作品自身文字；无冗余说明和分类标签。
+- Spacing and layout rhythm: 第一张卡片直接承接顶部栏；390px 视口无横向溢出，首屏可完整看到两张项目卡片与第三张入口。
+- Colors and visual tokens: 未改变品牌蓝、石墨黑与冷灰卡片色阶。
+- Image quality and asset fidelity: 卡片封面、头像与洋葱皮层叠素材均未改变；界面中的 Flow 应用图标已移除。
+- Copy and content: `正在生长 / 本周热门 / 最新源作 / 热流榜 / 持续更新` 均不存在；项目标题、作者、版本与互动数据保留。
+
+### Interaction and verification
+
+- 点击第一张项目卡片可进入详情，返回后首页状态正常。
+- production build: passed
+- broken images: 0
+- horizontal overflow: none（`innerWidth = 390`, `scrollWidth = 390`）
+- 未发现 P0 / P1 / P2 视觉或交互问题。
 
 final result: passed

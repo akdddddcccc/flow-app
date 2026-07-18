@@ -10,6 +10,14 @@ import mixedColorSource from "../../assets/content/covers/mixed-color-source.jpg
 import mondrianGroove from "../../assets/content/fragments/mondrian-groove.jpg";
 import mondrianFragment from "../../assets/content/fragments/mondrian-fragment.jpg";
 import romanticSketch from "../../assets/content/fragments/romantic-sketch.jpg";
+import xdRedTemple from "../../assets/content/fragments/xd-red-temple.jpg";
+import xdNeonProfile from "../../assets/content/fragments/xd-neon-profile.jpg";
+import xdNeonGlasses from "../../assets/content/fragments/xd-neon-glasses.jpg";
+import xdColorBird from "../../assets/content/fragments/xd-color-bird.jpg";
+import xdMotionBasketball from "../../assets/content/fragments/xd-motion-basketball.jpg";
+import xdPastelDunesSquare from "../../assets/content/fragments/xd-pastel-dunes-square.jpg";
+import xdPastelDunesWide from "../../assets/content/fragments/xd-pastel-dunes-wide.jpg";
+import xdCatsPoster from "../../assets/content/fragments/xd-cats-poster.jpg";
 import thinkerAvatar from "../../assets/content/avatars/thinker.jpg";
 
 // 所有展示素材都打包进项目，避免作品集上线后依赖第三方图片外链。
@@ -25,6 +33,14 @@ const IMAGE_ASSETS: Record<string, string> = {
   "romantic-blue-source": romanticBlueSource,
   "mixed-color-source": mixedColorSource,
   "romantic-sketch": romanticSketch,
+  "xd-red-temple": xdRedTemple,
+  "xd-neon-profile": xdNeonProfile,
+  "xd-neon-glasses": xdNeonGlasses,
+  "xd-color-bird": xdColorBird,
+  "xd-motion-basketball": xdMotionBasketball,
+  "xd-pastel-dunes-square": xdPastelDunesSquare,
+  "xd-pastel-dunes-wide": xdPastelDunesWide,
+  "xd-cats-poster": xdCatsPoster,
   "thinker-avatar": thinkerAvatar,
 };
 const IMG = (slug: string, _w = 900, _h?: number) => IMAGE_ASSETS[slug] ?? yellowSongCover;
@@ -372,6 +388,118 @@ export function createSeedState(): AppState {
         title: "陌生城市里的两个人",
         media: { kind: "pic", src: IMG("romantic-sketch", 900, 675) },
         createdAt: now - 18 * DAY,
+      },
+      {
+        id: "frag-visual-neon-profile",
+        authorId: "thinker",
+        title: "冷色霓虹 · 夜行肖像",
+        media: { kind: "pic", src: IMG("xd-neon-profile") },
+        createdAt: now - 17 * DAY,
+      },
+      {
+        id: "frag-visual-neon-glasses",
+        authorId: "sheng",
+        title: "高对比色 · 玻璃房间",
+        media: { kind: "pic", src: IMG("xd-neon-glasses") },
+        createdAt: now - 16 * DAY,
+      },
+      {
+        id: "frag-visual-color-bird",
+        authorId: "ayon",
+        title: "暖色鸟鸣 · 春日插画",
+        media: { kind: "pic", src: IMG("xd-color-bird") },
+        createdAt: now - 15 * DAY,
+      },
+      {
+        id: "frag-visual-motion",
+        authorId: "chen",
+        title: "运动残影 · 人物构图",
+        media: { kind: "pic", src: IMG("xd-motion-basketball") },
+        createdAt: now - 14 * DAY,
+      },
+      {
+        id: "frag-visual-dunes-square",
+        authorId: "thinker",
+        title: "低饱和梦境 · 青绿沙丘",
+        media: { kind: "pic", src: IMG("xd-pastel-dunes-square") },
+        createdAt: now - 13 * DAY,
+      },
+      {
+        id: "frag-visual-dunes-wide",
+        authorId: "aqueen",
+        title: "冷色地平线 · 清晨纹理",
+        media: { kind: "pic", src: IMG("xd-pastel-dunes-wide") },
+        createdAt: now - 12 * DAY,
+      },
+      {
+        id: "frag-visual-red-temple",
+        authorId: "sheng",
+        title: "红黑山寺 · 水墨构图",
+        media: { kind: "pic", src: IMG("xd-red-temple") },
+        createdAt: now - 11 * DAY,
+      },
+      {
+        id: "frag-visual-cats",
+        authorId: "ayon",
+        title: "暖黄色 · 猫群轨迹",
+        media: { kind: "pic", src: IMG("xd-cats-poster") },
+        createdAt: now - 10 * DAY,
+      },
+      {
+        id: "frag-sound-yellow-song",
+        authorId: "chen",
+        title: "浪漫主义小黄歌 · 主歌哼唱",
+        media: { kind: "sound", duration: 18 },
+        createdAt: now - 9 * DAY,
+      },
+      {
+        id: "frag-sound-long-ago",
+        authorId: "ayon",
+        title: "很久很久 · 钢琴旋律动机",
+        media: { kind: "sound", duration: 24 },
+        createdAt: now - 8 * DAY,
+      },
+      {
+        id: "frag-sound-qingcheng",
+        authorId: "sheng",
+        title: "青城山下 · 弦乐采样",
+        media: { kind: "sound", duration: 13 },
+        createdAt: now - 7 * DAY,
+      },
+      {
+        id: "frag-sound-china-x",
+        authorId: "thinker",
+        title: "China X · 城市节拍 Loop",
+        media: { kind: "sound", duration: 31 },
+        createdAt: now - 6 * DAY,
+      },
+      {
+        id: "frag-sound-blank",
+        authorId: "aqueen",
+        title: "空白 · 呼吸人声",
+        media: { kind: "sound", duration: 11 },
+        createdAt: now - 5 * DAY,
+      },
+      {
+        id: "frag-sound-family",
+        authorId: "chen",
+        title: "FAMILY · 鼓组切片",
+        media: { kind: "sound", duration: 16 },
+        createdAt: now - 4 * DAY,
+      },
+      {
+        id: "frag-sound-dry",
+        authorId: "ayon",
+        title: "天干物燥 · 低频节奏",
+        media: { kind: "sound", duration: 27 },
+        createdAt: now - 3 * DAY,
+      },
+      {
+        id: "frag-sound-growing",
+        authorId: "aqueen",
+        title: "负重一万斤长大 · 气声片段",
+        media: { kind: "sound", duration: 21 },
+        createdAt: now - 2 * DAY,
       },
     ]),
     projects: keyBy([

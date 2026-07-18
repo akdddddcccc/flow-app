@@ -14,6 +14,7 @@ import { CreateEntryScreen } from "./components/screens/CreateEntryScreen";
 import { DetailScreen } from "./components/screens/DetailScreen";
 import { FlowMapScreen } from "./components/screens/FlowMapScreen";
 import { ContinueFlowScreen } from "./components/screens/ContinueFlowScreen";
+import { flowMotion } from "./motion";
 
 function CurrentScreen({ screen }: { screen: Screen }) {
   switch (screen.name) {
@@ -41,21 +42,15 @@ function screenIdentity(screen: Screen) {
 const screenVariants = {
   enter: ({ direction, kind }: { direction: number; kind: string }) => ({
     opacity: 0,
-    x: kind === "tab" ? direction * 14 : direction * 24,
-    y: kind === "tab" ? 5 : 0,
-    scale: kind === "tab" ? 1 : 0.992,
+    x: kind === "tab" ? direction * 8 : direction * 20,
   }),
   center: {
     opacity: 1,
     x: 0,
-    y: 0,
-    scale: 1,
   },
   exit: ({ direction, kind }: { direction: number; kind: string }) => ({
     opacity: 0,
-    x: kind === "tab" ? direction * -10 : direction * -16,
-    y: kind === "tab" ? -3 : 0,
-    scale: kind === "tab" ? 1 : 0.996,
+    x: kind === "tab" ? direction * -6 : direction * -18,
   }),
 };
 
@@ -78,10 +73,7 @@ function Shell() {
             initial={reduceMotion ? false : "enter"}
             animate={reduceMotion ? undefined : "center"}
             exit={reduceMotion ? undefined : "exit"}
-            transition={{
-              duration: navMotion.kind === "tab" ? 0.24 : 0.3,
-              ease: [0.22, 1, 0.36, 1],
-            }}
+            transition={navMotion.kind === "tab" ? flowMotion.local : flowMotion.screen}
           >
             <CurrentScreen screen={current} />
           </motion.div>

@@ -1,0 +1,17 @@
+{
+  "name": "流 · 协作式艺术创作",
+  "short_name": "流",
+  "description": "让灵感自由流淌，把一件作品续成一棵可追溯的创作树。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3048f5",
+  "icons": [
+    {
+      "src": "/flow-app-icon.png",
+      "sizes": "369x369",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

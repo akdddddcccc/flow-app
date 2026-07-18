@@ -7,6 +7,7 @@ import { usePlayer } from "../../player";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
 import { FlowIcon } from "../icons/FlowIcon";
 import { RoleChip } from "../chips/Chips";
+import { flowMotion } from "../../motion";
 
 export function NodeDetailSheet({ node, onClose }: { node: FlowNode; onClose: () => void }) {
   const { state } = useFlowStore();
@@ -25,7 +26,7 @@ export function NodeDetailSheet({ node, onClose }: { node: FlowNode; onClose: ()
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
+      transition={flowMotion.fade}
     >
       <motion.div
         className="w-full rounded-t-3xl bg-white p-5 pb-7"
@@ -33,7 +34,7 @@ export function NodeDetailSheet({ node, onClose }: { node: FlowNode; onClose: ()
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
-        transition={{ type: "spring", stiffness: 360, damping: 36, mass: 0.88 }}
+        transition={flowMotion.sheet}
       >
         <div className="mx-auto mb-3 h-1 w-10 rounded-full" style={{ background: "var(--flow-gray)" }} />
         <div className="flex items-start gap-3">

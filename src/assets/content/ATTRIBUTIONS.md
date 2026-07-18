@@ -1,7 +1,7 @@
 # Flow demo image credits
 
 These images are bundled locally so the portfolio demo does not depend on third-party hotlinks.
-They are used under the Unsplash License. Behance and Pinterest were used only as visual-direction references.
+The credited stock images below are used under the Unsplash License. Behance and Pinterest were used only as visual-direction references.
 
 ## Covers and textures
 
@@ -9,6 +9,12 @@ They are used under the Unsplash License. Behance and Pinterest were used only a
 - `covers/city-lights-cover.jpg` — Richard Horvath — https://unsplash.com/s/photos/black-and-blue-background
 - `fragments/mondrian-groove.jpg` — Pawel Czerwinski — https://unsplash.com/s/photos/black-and-blue-background
 - `fragments/mondrian-fragment.jpg` — Pawel Czerwinski — https://unsplash.com/s/photos/black-and-blue-background
+
+## Legacy Flow source material
+
+- `fragments/xd-*.jpg` — inspiration-search artwork supplied inside the user's `flow app.xd` source file and reused for this interactive prototype.
+- `fragments/xd-audio-waveform.png` — rasterized from the original XD audio component's `声波2` source geometry and opacity treatment.
+- `public/flow-app-icon.png` — official Flow app icon supplied by the user.
 
 ## Avatars
 

@@ -3,6 +3,7 @@ import { Play, Pause, X, SkipBack, SkipForward } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { usePlayer, fmtTime } from "../../player";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
+import { flowMotion } from "../../motion";
 
 /** 固定在 BottomNav 之上的迷你播放器，切页不中断。 */
 export function MiniPlayer() {
@@ -19,7 +20,7 @@ export function MiniPlayer() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 12 }}
-            transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+            transition={flowMotion.local}
           >
             <div className="relative h-0.5 w-full overflow-hidden rounded-full" style={{ background: "var(--flow-gray)" }}>
               <motion.div
@@ -50,7 +51,8 @@ export function MiniPlayer() {
                 aria-label={playing ? "暂停" : "播放"}
                 className="grid size-9 place-items-center rounded-full text-white"
                 style={{ background: "var(--flow-blue)" }}
-                whileTap={{ scale: 0.88 }}
+                whileTap={{ scale: 0.96 }}
+                transition={flowMotion.press}
               >
                 {playing ? <Pause size={16} fill="white" /> : <Play size={16} fill="white" />}
               </motion.button>
@@ -76,7 +78,7 @@ function FullPlayer({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
+      transition={flowMotion.fade}
     >
       <motion.div
         className="w-full max-w-[440px] rounded-t-3xl bg-white p-6 pb-10"
@@ -84,7 +86,7 @@ function FullPlayer({ onClose }: { onClose: () => void }) {
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
-        transition={{ type: "spring", stiffness: 340, damping: 36, mass: 0.9 }}
+        transition={flowMotion.sheet}
       >
         <div className="flex justify-end">
           <button type="button" onClick={onClose} aria-label="关闭" className="grid size-9 place-items-center rounded-full" style={{ background: "var(--flow-warm)" }}>

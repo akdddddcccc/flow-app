@@ -4,6 +4,7 @@ import { useNav, type Screen } from "../nav";
 import discoverIcon from "../../assets/figma-bottom-nav/discover-icon.svg";
 import createButton from "../../assets/figma-bottom-nav/create-button.svg";
 import profileIcon from "../../assets/figma-bottom-nav/profile-icon.svg";
+import { flowMotion } from "../motion";
 
 type TabDef = {
   name: "home" | "discover" | "profile";
@@ -44,8 +45,8 @@ export function BottomNav() {
         aria-label="创作"
         className="absolute top-[-1px] h-16 w-[117px] -translate-x-1/2 overflow-visible"
         style={{ left: "62.5%" }}
-        whileTap={{ scale: 0.96 }}
-        transition={{ type: "spring", stiffness: 500, damping: 32 }}
+        whileTap={{ scale: 0.97 }}
+        transition={flowMotion.press}
         data-node-id="582:181"
       >
         <img
@@ -74,8 +75,9 @@ function TabBtn({ tab, active }: { tab: TabDef; active: boolean }) {
         left: tab.center,
         color: active ? "var(--flow-blue)" : "var(--flow-muted)",
       }}
-      whileTap={{ scale: 0.92 }}
-      transition={{ type: "spring", stiffness: 520, damping: 32 }}
+      animate={{ y: active ? -1 : 0, scale: active ? 1 : 0.96 }}
+      whileTap={{ scale: 0.95 }}
+      transition={flowMotion.settle}
       data-node-id={tab.nodeId}
     >
       {tab.Icon ? (

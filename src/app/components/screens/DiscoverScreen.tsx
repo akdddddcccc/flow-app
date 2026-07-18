@@ -8,6 +8,8 @@ import {
   GitBranch,
   Music2,
   Palette,
+  Pause,
+  Play,
   RotateCcw,
   Search,
   SlidersHorizontal,
@@ -15,14 +17,20 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useFlowStore, selectNodesOfFlow } from "../../data/store";
-import { ROLE_LIST, type MediaKind, type Role } from "../../data/types";
+import { ROLE_LIST, type Fragment, type MediaKind, type Role } from "../../data/types";
 import { ProjectCard, FragmentCard } from "../ContentCard";
 import { EmptyState } from "../states/States";
+import { ImageWithFallback } from "../figma/ImageWithFallback";
+import { useNav } from "../../nav";
+import { fmtTime, usePlayer } from "../../player";
+import waveformAsset from "../../../assets/content/fragments/xd-audio-waveform.png";
+import { flowMotion, staggerDelay } from "../../motion";
 
 type ResultType = "全部" | "创作流" | "灵感碎片";
 type PresetId = "sound" | "visual" | "text" | "cross" | "color" | "mood" | "open";
+type FragmentLayout = "list" | "gallery" | "sound";
 
 type BrowsePreset = {
   id: PresetId;
@@ -62,6 +70,7 @@ export function DiscoverScreen() {
   const preset = ALL_PRESETS.find((item) => item.id === presetId) ?? null;
   const q = query.trim().toLowerCase();
   const inResults = Boolean(q || preset);
+  const fragmentLayout: FragmentLayout = preset?.media === "pic" ? "gallery" : preset?.media === "sound" ? "sound" : "list";
 
   const projects = useMemo(() => {
     if (resultType === "灵感碎片") return [];
@@ -152,7 +161,7 @@ export function DiscoverScreen() {
             initial={{ opacity: 0, x: -12 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -10 }}
-            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+            transition={flowMotion.local}
           >
             <section className="pt-2">
               <SectionHeading title="按媒介探索" hint="先选择作品形态" />
@@ -203,7 +212,7 @@ export function DiscoverScreen() {
             initial={{ opacity: 0, x: 16 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 10 }}
-            transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+            transition={flowMotion.local}
           >
             <div className="flex items-center justify-between pt-1">
               <div>
@@ -218,15 +227,24 @@ export function DiscoverScreen() {
             {preset && (
               <div className="mt-4 flex flex-wrap gap-2" aria-label="二级分类">
                 {preset.subcategories.map((item) => (
-                  <button
+                  <motion.button
                     key={item}
                     type="button"
                     onClick={() => setSubcategory(item)}
-                    className="rounded-full px-3.5 py-2 text-[12px] font-medium"
-                    style={{ background: subcategory === item ? "black" : "var(--flow-warm)", color: subcategory === item ? "white" : "var(--flow-muted)" }}
+                    className="relative overflow-hidden rounded-full px-3.5 py-2 text-[12px] font-medium"
+                    style={{ background: "var(--flow-warm)", color: subcategory === item ? "white" : "var(--flow-muted)" }}
+                    whileTap={{ scale: 0.97 }}
+                    transition={flowMotion.press}
                   >
-                    {item}
-                  </button>
+                    {subcategory === item && (
+                      <motion.span
+                        layoutId="discover-subcategory-active"
+                        className="absolute inset-0 rounded-full bg-black"
+                        transition={flowMotion.settle}
+                      />
+                    )}
+                    <span className="relative z-10">{item}</span>
+                  </motion.button>
                 ))}
               </div>
             )}
@@ -238,7 +256,7 @@ export function DiscoverScreen() {
                 {fragments.length > 0 && (
                   <section>
                     <h2 className="mb-3 text-[13px] font-bold">灵感碎片</h2>
-                    <div className="space-y-2">{fragments.map((fragment) => <FragmentCard key={fragment.id} fragment={fragment} />)}</div>
+                    <FragmentResultCollection fragments={fragments} layout={fragmentLayout} />
                   </section>
                 )}
                 {projects.length > 0 && (
@@ -267,6 +285,7 @@ export function DiscoverScreen() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={flowMotion.fade}
             />
             <motion.div
               role="dialog"
@@ -276,7 +295,14 @@ export function DiscoverScreen() {
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
-              transition={{ type: "spring", stiffness: 390, damping: 36 }}
+              transition={flowMotion.sheet}
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0.025, bottom: 0.26 }}
+              dragMomentum={false}
+              onDragEnd={(_, info) => {
+                if (info.offset.y > 72 || info.velocity.y > 650) setShowFilters(false);
+              }}
             >
               <div className="mx-auto h-1 w-10 rounded-full bg-black/15" />
               <div className="mt-4 flex items-center justify-between">
@@ -332,7 +358,7 @@ function SectionHeading({ title, hint }: { title: string; hint: string }) {
 
 function MediaEntry({ item, onClick }: { item: BrowsePreset; onClick: () => void }) {
   return (
-    <motion.button type="button" onClick={onClick} className="min-h-[130px] rounded-3xl p-4 text-left" style={{ background: "var(--flow-warm)" }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 470, damping: 34 }}>
+    <motion.button type="button" onClick={onClick} className="min-h-[130px] rounded-3xl p-4 text-left" style={{ background: "var(--flow-warm)" }} whileTap={{ scale: 0.97 }} transition={flowMotion.press}>
       <span className="grid size-11 place-items-center rounded-2xl bg-white"><item.Icon size={21} color="var(--flow-blue)" /></span>
       <span className="mt-4 block text-[14px] font-bold">{item.label}</span>
       <span className="mt-1 block text-[11px] leading-snug" style={{ color: "var(--flow-muted)" }}>{item.description}</span>
@@ -354,6 +380,120 @@ function FilterPill({ label, active, onClick }: { label: string; active: boolean
     <button type="button" onClick={onClick} className="rounded-full px-3.5 py-2 text-[12px] font-medium" style={{ background: active ? "black" : "var(--flow-warm)", color: active ? "white" : "var(--flow-muted)" }}>
       {label}
     </button>
+  );
+}
+
+function FragmentResultCollection({ fragments, layout }: { fragments: Fragment[]; layout: FragmentLayout }) {
+  if (layout === "gallery") {
+    return (
+      <div className="grid grid-cols-2 gap-2.5">
+        {fragments.map((fragment, index) => <VisualFragmentTile key={fragment.id} fragment={fragment} index={index} />)}
+      </div>
+    );
+  }
+
+  if (layout === "sound") {
+    return (
+      <div className="space-y-2.5">
+        {fragments.map((fragment, index) => <SoundFragmentRow key={fragment.id} fragment={fragment} index={index} />)}
+      </div>
+    );
+  }
+
+  return <div className="space-y-2">{fragments.map((fragment) => <FragmentCard key={fragment.id} fragment={fragment} />)}</div>;
+}
+
+function VisualFragmentTile({ fragment, index }: { fragment: Fragment; index: number }) {
+  const { state } = useFlowStore();
+  const nav = useNav();
+  const author = state.users[fragment.authorId];
+
+  return (
+    <motion.button
+      type="button"
+      onClick={() => nav.push({ name: "detail", targetId: fragment.id })}
+      aria-label={`查看${fragment.title}详情`}
+      className="group relative aspect-square overflow-hidden rounded-[20px] bg-[var(--flow-warm)] text-left"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileTap={{ scale: 0.975 }}
+      transition={{ ...flowMotion.local, delay: staggerDelay(index) }}
+    >
+      {fragment.media.src && (
+        <ImageWithFallback
+          src={fragment.media.src}
+          alt={fragment.title}
+          className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.035]"
+        />
+      )}
+      <span className="absolute inset-x-2 bottom-2 rounded-xl bg-black/60 px-2.5 py-2 text-white backdrop-blur-md">
+        <span className="block truncate text-[11px] font-semibold">{fragment.title}</span>
+        <span className="mt-0.5 block truncate text-[9px] text-white/68">{author?.name} · 图片碎片</span>
+      </span>
+    </motion.button>
+  );
+}
+
+const SOUND_CARD_TONES = ["#e7e4d7", "#f0e0df", "#e1e4e9", "#dce7e4", "#e8e3ee"];
+
+function SoundFragmentRow({ fragment, index }: { fragment: Fragment; index: number }) {
+  const { state } = useFlowStore();
+  const nav = useNav();
+  const { toggle, isCurrent } = usePlayer();
+  const author = state.users[fragment.authorId];
+  const playing = isCurrent(fragment.id);
+  const duration = fragment.media.duration ?? 12;
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      role="button"
+      tabIndex={0}
+      aria-label={`查看${fragment.title}详情`}
+      onClick={() => nav.push({ name: "detail", targetId: fragment.id })}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          nav.push({ name: "detail", targetId: fragment.id });
+        }
+      }}
+      className="relative flex min-h-[86px] cursor-pointer items-center gap-3 overflow-hidden rounded-[20px] px-3.5 py-3 text-left"
+      style={{ background: SOUND_CARD_TONES[index % SOUND_CARD_TONES.length] }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileTap={{ scale: 0.985 }}
+      transition={{ ...flowMotion.local, delay: staggerDelay(index) }}
+    >
+      <motion.img
+        src={waveformAsset}
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-[-4px] left-[68px] right-3 h-[44px] w-[calc(100%_-_80px)] object-fill"
+        initial={false}
+        animate={{
+          opacity: playing ? 0.3 : 0.14,
+          scaleY: !reduceMotion && playing ? 1.06 : 1,
+        }}
+        transition={flowMotion.settle}
+      />
+      <button
+        type="button"
+        aria-label={playing ? "暂停" : "播放"}
+        onClick={(event) => {
+          event.stopPropagation();
+          toggle({ id: fragment.id, title: fragment.title, subtitle: author?.name, duration });
+        }}
+        className="relative z-10 grid size-10 shrink-0 place-items-center rounded-full bg-white/90 shadow-[0_3px_12px_rgba(0,0,0,0.08)] transition-transform duration-100 active:scale-[0.96]"
+      >
+        {playing ? <Pause size={16} fill="var(--flow-blue)" color="var(--flow-blue)" /> : <Play size={16} fill="var(--flow-blue)" color="var(--flow-blue)" />}
+      </button>
+
+      <div className="relative z-10 min-w-0 flex-1 self-start pt-1.5">
+        <h3 className="truncate text-[13px] font-semibold">{fragment.title}</h3>
+        <p className="mt-1 truncate text-[10px]" style={{ color: "var(--flow-muted)" }}>{author?.name} · {fmtTime(duration)}</p>
+      </div>
+
+    </motion.div>
   );
 }
 

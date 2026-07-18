@@ -28,6 +28,18 @@ body,
     box-shadow 320ms ease;
 }
 
+.flow-app-shell button,
+.flow-app-shell [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-app-shell {
+    transition-duration: 200ms;
+  }
+}
+
 /* 保留触控、触控板与鼠标滚轮滚动，但不暴露桌面网页式拖动条。 */
 .flow-app-shell,
 .flow-app-shell * {

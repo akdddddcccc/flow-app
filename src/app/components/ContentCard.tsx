@@ -8,6 +8,7 @@ import { usePlayer } from "../player";
 import { useFlowStore } from "../data/store";
 import { useNav } from "../nav";
 import { fmtCount } from "../util";
+import { flowMotion } from "../motion";
 
 const CARD_TONES: Record<FlowCardTone, {
   surface: string;
@@ -192,7 +193,7 @@ export function ProjectCard({ project, nodeCount }: { project: FlowProject; node
       layout="position"
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+      transition={flowMotion.local}
     >
       {visibleLayers.map((layer, index) => (
         <motion.div
@@ -243,7 +244,7 @@ export function ProjectCard({ project, nodeCount }: { project: FlowProject; node
           }
         }}
         whileTap={{ scale: 0.985 }}
-        transition={{ type: "spring", stiffness: 430, damping: 34 }}
+        transition={flowMotion.press}
       >
         {/* Cover photo: inset with own rounded corners */}
         <div className="relative mx-2.5 mt-2.5 overflow-hidden rounded-[18px]">
@@ -374,7 +375,7 @@ export function FragmentCard({ fragment }: { fragment: Fragment }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       whileTap={{ scale: 0.985 }}
-      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+      transition={flowMotion.local}
     >
       <div
         className="relative size-16 shrink-0 overflow-hidden rounded-xl"
