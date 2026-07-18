@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileStack } from "lucide-react";
+import { FolderOpen } from "@phosphor-icons/react";
 import { useFlowStore, selectNodesOfFlow } from "../../data/store";
 import { useNav } from "../../nav";
 import { TopBar } from "../TopBar";
@@ -36,7 +36,7 @@ export function ProfileScreen() {
         title="我的"
         right={
           <button type="button" onClick={() => nav.push({ name: "drafts" })} aria-label="草稿箱" className="grid size-10 place-items-center rounded-full" style={{ background: "var(--flow-warm)" }}>
-            <FileStack size={18} />
+            <FolderOpen size={22} weight="regular" aria-hidden="true" />
           </button>
         }
       />

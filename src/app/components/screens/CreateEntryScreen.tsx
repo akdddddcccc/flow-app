@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { FileStack, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import { FolderOpen } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "motion/react";
 import { toast } from "sonner";
 import { useFlowStore } from "../../data/store";
@@ -60,7 +61,7 @@ function Menu({ onPick }: { onPick: (m: Mode) => void }) {
       <div className="flex-1 space-y-3 p-5">
         <EntryBtn icon={<FlowIcon kind="fragment" size={44} />} title="发布灵感碎片" desc="一段旋律、一句词、一张图——尚未成形的想法" onClick={() => onPick("fragment")} />
         <EntryBtn icon={<FlowIcon kind="source" size={44} />} title="发布一个源" desc="有音乐性的起点，开放给他人续流成树" onClick={() => onPick("source")} />
-        <EntryBtn icon={<span className="grid size-11 place-items-center rounded-xl" style={{ background: "var(--flow-warm)" }}><FileStack size={22} color="var(--flow-blue)" /></span>} title={`继续草稿${draftCount ? ` · ${draftCount}` : ""}`} desc="回到未完成的创作" onClick={() => nav.replace({ name: "drafts" })} />
+        <EntryBtn icon={<span className="grid size-11 place-items-center rounded-xl" style={{ background: "var(--flow-warm)" }}><FolderOpen size={26} weight="regular" color="var(--flow-blue)" aria-hidden="true" /></span>} title={`继续草稿${draftCount ? ` · ${draftCount}` : ""}`} desc="回到未完成的创作" onClick={() => nav.replace({ name: "drafts" })} />
       </div>
     </div>
   );

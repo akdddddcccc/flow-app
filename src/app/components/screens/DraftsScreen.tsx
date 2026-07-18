@@ -1,4 +1,4 @@
-import { FileStack } from "lucide-react";
+import { FolderOpen } from "@phosphor-icons/react";
 import { useFlowStore } from "../../data/store";
 import { TopBar } from "../TopBar";
 import { DraftCard } from "../DraftCard";
@@ -15,7 +15,7 @@ export function DraftsScreen() {
         {drafts.length ? (
           drafts.map((d) => <DraftCard key={d.id} draft={d} />)
         ) : (
-          <EmptyState icon={<FileStack size={32} />} title="草稿箱是空的" hint="创作时会自动保存草稿" />
+          <EmptyState icon={<FolderOpen size={34} weight="regular" aria-hidden="true" />} title="草稿箱是空的" hint="创作时会自动保存草稿" />
         )}
       </div>
     </div>

@@ -57,52 +57,52 @@ const CARD_TONES: Record<FlowCardTone, {
 
 const STACK_LAYERS = [
   {
-    top: -16,
-    inset: 10,
-    rotate: 7,
-    x: 14,
-    scaleX: 0.97,
-    opacity: 0.2,
-    blur: 3.5,
-    duration: 9.6,
-    driftX: 3,
-    driftY: 3,
-  },
-  {
-    top: -10,
-    inset: 6,
-    rotate: -5.5,
-    x: -12,
-    scaleX: 0.978,
-    opacity: 0.32,
-    blur: 2.3,
-    duration: 8.4,
-    driftX: -3,
-    driftY: 2,
+    top: -8,
+    inset: 8,
+    rotate: 2.2,
+    x: 4,
+    scaleX: 0.986,
+    opacity: 0.18,
+    blur: 3,
+    duration: 11.8,
+    driftX: 0.8,
+    driftY: 0.7,
   },
   {
     top: -5,
-    inset: 3,
-    rotate: 4,
-    x: 8,
-    scaleX: 0.986,
-    opacity: 0.46,
-    blur: 1.4,
-    duration: 7.4,
-    driftX: 2,
-    driftY: 1.5,
+    inset: 5,
+    rotate: -1.6,
+    x: -3,
+    scaleX: 0.991,
+    opacity: 0.3,
+    blur: 2.1,
+    duration: 10.6,
+    driftX: -0.7,
+    driftY: 0.6,
   },
   {
-    top: 0,
-    inset: 1,
-    rotate: -2.8,
-    x: -4,
+    top: -3,
+    inset: 3,
+    rotate: 1.1,
+    x: 2,
     scaleX: 0.995,
-    opacity: 0.64,
-    blur: 0.6,
-    duration: 6.4,
-    driftX: -1.5,
-    driftY: 1,
+    opacity: 0.43,
+    blur: 1.2,
+    duration: 9.4,
+    driftX: 0.6,
+    driftY: 0.5,
+  },
+  {
+    top: -1,
+    inset: 1,
+    rotate: -0.7,
+    x: -1,
+    scaleX: 0.998,
+    opacity: 0.58,
+    blur: 0.5,
+    duration: 8.6,
+    driftX: -0.45,
+    driftY: 0.35,
   },
 ] as const;
 
@@ -182,7 +182,8 @@ export function ProjectCard({ project, nodeCount }: { project: FlowProject; node
   // 子节点越多，露出的洋葱皮片层越多：2 / 3 / 4 层。
   const layerCount = nodeCount >= 9 ? 4 : nodeCount >= 5 ? 3 : nodeCount >= 2 ? 2 : 0;
   const visibleLayers = STACK_LAYERS.slice(STACK_LAYERS.length - layerCount);
-  const pb = layerCount * 10;
+  const layerReveal = 5;
+  const pb = layerCount * 6;
 
   return (
     <motion.div
@@ -200,7 +201,7 @@ export function ProjectCard({ project, nodeCount }: { project: FlowProject; node
           className="pointer-events-none absolute rounded-[28px]"
           style={{
             top: layer.top,
-            bottom: index * 10,
+            bottom: index * layerReveal,
             left: layer.inset,
             right: layer.inset,
             backgroundColor: tone.surface,
@@ -249,7 +250,7 @@ export function ProjectCard({ project, nodeCount }: { project: FlowProject; node
           <ImageWithFallback
             src={project.cover}
             alt={project.title}
-            className="h-[126px] w-full object-cover"
+            className="h-[108px] w-full object-cover"
           />
           {/* Flow-type badge */}
           <span
@@ -284,9 +285,9 @@ export function ProjectCard({ project, nodeCount }: { project: FlowProject; node
         </div>
 
         {/* Blue title + meta strip */}
-        <div className="px-4 pb-3.5 pt-2.5">
-          <h3 className="text-[17px] font-bold leading-snug" style={{ color: tone.ink }}>{project.title}</h3>
-          <div className="mt-1.5 flex items-center justify-between gap-2">
+        <div className="px-4 pb-3 pt-2">
+          <h3 className="text-[16px] font-bold leading-snug" style={{ color: tone.ink }}>{project.title}</h3>
+          <div className="mt-1 flex items-center justify-between gap-2">
             <div
               className="flex min-w-0 items-center gap-1.5 text-[12px]"
               style={{ color: tone.meta }}

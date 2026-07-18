@@ -105,6 +105,7 @@ function RankedProject({
   nodeCount: number;
 }) {
   const { state } = useFlowStore();
+  const [showReason, setShowReason] = useState(false);
   const contributors = new Set(selectNodesOfFlow(state, project.id).map((node) => node.authorId)).size;
   const ageDays = Math.max(1, Math.round((Date.now() - project.createdAt) / 86400000));
   const reason = ranking === "正在生长"
@@ -115,14 +116,27 @@ function RankedProject({
 
   return (
     <section>
-      <div className="mb-2 flex items-center gap-2 px-1">
-        <span
-          className="grid size-6 place-items-center rounded-full text-[11px] font-bold"
+      <div className="group relative mb-1 flex h-6 items-center px-1">
+        <button
+          type="button"
+          aria-label={`第 ${rank} 名，${reason}`}
+          aria-expanded={showReason}
+          aria-describedby={showReason ? `rank-reason-${project.id}` : undefined}
+          onClick={() => setShowReason((visible) => !visible)}
+          onBlur={() => setShowReason(false)}
+          className="grid size-6 place-items-center rounded-full text-[11px] font-bold outline-none ring-offset-2 focus-visible:ring-2"
           style={{ background: rank <= 3 ? "var(--flow-blue)" : "var(--flow-warm)", color: rank <= 3 ? "white" : "black" }}
         >
           {rank}
-        </span>
-        <p className="text-[11px]" style={{ color: "var(--flow-muted)" }}>{reason}</p>
+        </button>
+        <p
+          id={`rank-reason-${project.id}`}
+          role="tooltip"
+          aria-hidden={!showReason}
+          className={`pointer-events-none absolute left-9 top-0 z-20 h-6 items-center whitespace-nowrap rounded-full bg-black px-2.5 text-[10px] text-white shadow-lg ${showReason ? "flex" : "hidden group-focus-within:flex group-hover:flex"}`}
+        >
+          {reason}
+        </p>
       </div>
       <ProjectCard project={project} nodeCount={nodeCount} />
     </section>
