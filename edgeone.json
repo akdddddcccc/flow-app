@@ -1,6 +1,6 @@
 {
-  "installCommand": "corepack enable && pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm run build",
+  "installCommand": "npx --yes pnpm@11.9.0 install --frozen-lockfile",
+  "buildCommand": "npx --yes pnpm@11.9.0 run build",
   "outputDirectory": "./dist",
   "nodeVersion": "22.11.0"
 }
