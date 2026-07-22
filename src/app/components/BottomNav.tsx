@@ -21,8 +21,8 @@ type TabDef = {
  * 发布按钮固定在 62.5% 位置，并使用原始 141×123 矢量资产。
  */
 const TABS: TabDef[] = [
-  { name: "home", label: "热流", Icon: TrendingUp, center: "14.360465%", nodeId: "582:169" },
-  { name: "discover", label: "发现", icon: discoverIcon, center: "39.360465%", nodeId: "582:175" },
+  { name: "home", label: "续流", Icon: TrendingUp, center: "14.360465%", nodeId: "582:169" },
+  { name: "discover", label: "找灵感", icon: discoverIcon, center: "39.360465%", nodeId: "582:175" },
   { name: "profile", label: "我的", icon: profileIcon, center: "85.639535%", nodeId: "582:185" },
 ];
 

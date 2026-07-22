@@ -1,4 +1,4 @@
-import type { AppState, FlowNode } from "./types";
+import type { AppState, FlowNode, FlowProject, Fragment, MediaKind, Role } from "./types";
 import chenAvatar from "../../assets/content/avatars/chen.jpg";
 import ayonAvatar from "../../assets/content/avatars/ayon.jpg";
 import shengAvatar from "../../assets/content/avatars/sheng.jpg";
@@ -305,6 +305,130 @@ const mixedColorNodes: FlowNode[] = [
   },
 ];
 
+type FlowSeed = {
+  title: string;
+  description: string;
+  cover: string;
+  tags: string[];
+  ownerId: string;
+  sourceKind: MediaKind;
+  roles: Role[];
+};
+
+const EXTRA_FLOW_SEEDS: FlowSeed[] = [
+  { title: "凌晨四点的便利店", description: "冰柜低鸣、雨声和一小段没唱完的旋律。", cover: "xd-neon-profile", tags: ["城市", "氛围", "lo-fi"], ownerId: "sheng", sourceKind: "sound", roles: ["作词", "编曲"] },
+  { title: "蓝色回声", description: "从冷色人像出发，把轮廓续成缓慢扩散的合成器。", cover: "xd-neon-glasses", tags: ["冷色", "电子", "视觉"], ownerId: "thinker", sourceKind: "pic", roles: ["视觉", "编曲"] },
+  { title: "风经过旧操场", description: "一段木吉他和夏末风声，等待新的主唱。", cover: "xd-pastel-dunes-wide", tags: ["民谣", "夏天", "人声"], ownerId: "ayon", sourceKind: "sound", roles: ["乐器", "演唱"] },
+  { title: "红墙以外", description: "水墨与低频鼓点之间的跨媒介续作。", cover: "xd-red-temple", tags: ["实验", "东方", "视觉"], ownerId: "sheng", sourceKind: "pic", roles: ["视觉", "混音"] },
+  { title: "候鸟电台", description: "把鸟鸣、短波噪声和手写歌词放进同一条流。", cover: "xd-color-bird", tags: ["采样", "自然", "叙事"], ownerId: "aqueen", sourceKind: "sound", roles: ["演唱", "作词"] },
+  { title: "失重练习", description: "从运动残影里提取节奏，让画面和鼓点一起加速。", cover: "xd-motion-basketball", tags: ["节奏", "能量", "影像"], ownerId: "chen", sourceKind: "pic", roles: ["编曲", "视觉"] },
+  { title: "柔软地形", description: "低饱和沙丘、气声与颗粒合成器的缓慢生长。", cover: "xd-pastel-dunes-square", tags: ["梦境", "氛围", "低饱和"], ownerId: "thinker", sourceKind: "pic", roles: ["视觉", "混音"] },
+  { title: "猫在黄色屋顶", description: "轻快切片、猫叫采样和可以继续写下去的副歌。", cover: "xd-cats-poster", tags: ["轻快", "采样", "流行"], ownerId: "ayon", sourceKind: "sound", roles: ["编曲", "作词"] },
+  { title: "无人接听", description: "从一句留言开始，逐渐长成克制的都市情歌。", cover: "city-lights-cover", tags: ["文字", "情歌", "城市"], ownerId: "aqueen", sourceKind: "text", roles: ["作词", "演唱"] },
+];
+
+const generatedProjects: FlowProject[] = EXTRA_FLOW_SEEDS.map((seed, index) => {
+  const flowId = `demo-flow-${index + 1}`;
+  return {
+    id: flowId,
+    title: seed.title,
+    cover: IMG(seed.cover),
+    visualTone: index % 3 === 0 ? "blue" : index % 3 === 1 ? "mist" : "graphite",
+    description: seed.description,
+    license: index === 7 ? "noncommercial" : "attribution",
+    ownerId: seed.ownerId,
+    sourceNodeId: `${flowId}-source`,
+    tags: seed.tags,
+    likes: 86 + index * 31,
+    saves: 18 + index * 9,
+    createdAt: now - (index + 2) * DAY,
+  };
+});
+
+const generatedNodes: FlowNode[] = EXTRA_FLOW_SEEDS.flatMap((seed, index) => {
+  const flowId = `demo-flow-${index + 1}`;
+  const sourceId = `${flowId}-source`;
+  const sourceMedia = seed.sourceKind === "pic"
+    ? [{ kind: "pic" as const, src: IMG(seed.cover) }]
+    : seed.sourceKind === "text"
+      ? [{ kind: "text" as const, text: "有些声音没有被接起，却在夜里慢慢长成一首歌。" }]
+      : [{ kind: "sound" as const, duration: 36 + index * 3 }];
+  return [
+    {
+      id: sourceId,
+      flowId,
+      parentId: null,
+      kind: "source" as const,
+      authorId: seed.ownerId,
+      roles: [seed.roles[0]],
+      title: `源 · ${seed.title}`,
+      changeNote: seed.description,
+      media: sourceMedia,
+      fragmentRefs: [],
+      createdAt: now - (index + 12) * DAY,
+    },
+    {
+      id: `${flowId}-branch-a`,
+      flowId,
+      parentId: sourceId,
+      kind: "flow" as const,
+      authorId: index % 2 ? "chen" : "ayon",
+      roles: [seed.roles[1] ?? seed.roles[0]],
+      title: "第一条续作 · 重新组织结构",
+      changeNote: "保留源的情绪，把节奏、段落和留白重新组织了一遍。",
+      media: [{ kind: "sound" as const, duration: 58 + index * 4 }],
+      fragmentRefs: [],
+      createdAt: now - (index + 7) * DAY,
+    },
+    {
+      id: `${flowId}-branch-b`,
+      flowId,
+      parentId: sourceId,
+      kind: "flow" as const,
+      authorId: index % 2 ? "thinker" : "sheng",
+      roles: index % 2 ? ["视觉" as const] : ["作词" as const],
+      title: index % 2 ? "另一种画面方向" : "补写一段叙事",
+      changeNote: index % 2 ? "从源的色彩关系延伸出更克制的画面。" : "沿着源里的情绪补写了新的叙事线索。",
+      media: index % 2 ? [{ kind: "pic" as const, src: IMG(seed.cover) }] : [{ kind: "text" as const, text: "让没有说完的部分留在风里，等下一个人继续。" }],
+      fragmentRefs: [],
+      createdAt: now - (index + 4) * DAY,
+    },
+  ];
+});
+
+const TEXT_INSPIRATIONS = [
+  "天快亮的时候，城市像一台刚刚停下来的机器。",
+  "我们没有告别，只是把最后一句话留在了雨里。",
+  "风从旧操场穿过去，带走一小段没有写完的副歌。",
+  "如果月亮也有背面，那里会不会存着所有没寄出的信。",
+  "人群散开以后，我才听见鞋底和地面交换秘密。",
+  "把沉默切成四拍，第二拍留给呼吸。",
+  "凌晨的便利店里，冰柜替每个人保守秘密。",
+  "有一只鸟停在电线上，像乐谱里迟迟不肯落下的音。",
+  "蓝色不是一种颜色，是记忆降温后的声音。",
+  "我们沿着同一条河走，却在不同的梦里到达海边。",
+  "旧磁带转到空白处，仍然能听见房间里的风。",
+  "请把我的名字唱得轻一点，不要惊醒昨天。",
+  "所有错过的车站，最后都变成了故事的转调。",
+  "雨滴落在铁皮屋顶上，像一支没有指挥的鼓队。",
+  "我想写一首没有结尾的歌，让每个人都能续上一句。",
+  "晚霞退场以后，楼群开始练习另一种呼吸。",
+  "那天的风很慢，慢到足够我们重新认识彼此。",
+  "把白噪声开大一点，我想听清楚孤独的轮廓。",
+  "灯熄灭之前，影子先替我们拥抱了一次。",
+  "如果重逢有声音，它应该像唱针落下的第一秒。",
+];
+
+const SOUND_INSPIRATIONS = ["玻璃杯边缘的高频", "雨棚下的四拍", "旧电梯低频循环", "口袋里的节拍器", "短波电台残响", "楼道脚步采样", "木吉他未完成和弦", "清晨鸟鸣切片", "地铁进站的低鸣", "呼吸与磁带底噪"];
+const PIC_INSPIRATIONS = ["冷色夜行肖像", "玻璃房间的反光", "春日鸟鸣配色", "运动残影构图", "青绿沙丘纹理", "清晨地平线", "红黑山寺", "黄色猫群轨迹", "蒙德里安节奏", "陌生城市速写"];
+const PIC_ASSETS = ["xd-neon-profile", "xd-neon-glasses", "xd-color-bird", "xd-motion-basketball", "xd-pastel-dunes-square", "xd-pastel-dunes-wide", "xd-red-temple", "xd-cats-poster", "mondrian-fragment", "romantic-sketch"];
+
+const generatedFragments: Fragment[] = [
+  ...TEXT_INSPIRATIONS.map((text, index) => ({ id: `text-inspiration-${index + 1}`, authorId: ["sheng", "ayon", "chen", "aqueen", "thinker"][index % 5], title: `文字碎片 ${String(index + 1).padStart(2, "0")}`, media: { kind: "text" as const, text }, createdAt: now - index * 3_600_000 })),
+  ...SOUND_INSPIRATIONS.map((title, index) => ({ id: `sound-inspiration-${index + 1}`, authorId: ["chen", "ayon", "aqueen", "sheng"][index % 4], title, media: { kind: "sound" as const, duration: 8 + index * 3 }, createdAt: now - (index + 24) * 3_600_000 })),
+  ...PIC_INSPIRATIONS.map((title, index) => ({ id: `pic-inspiration-${index + 1}`, authorId: ["thinker", "sheng", "ayon"][index % 3], title, media: { kind: "pic" as const, src: IMG(PIC_ASSETS[index]) }, createdAt: now - (index + 36) * 3_600_000 })),
+];
+
 function keyBy<T extends { id: string }>(arr: T[]): Record<string, T> {
   return Object.fromEntries(arr.map((x) => [x.id, x]));
 }
@@ -501,6 +625,7 @@ export function createSeedState(): AppState {
         media: { kind: "sound", duration: 21 },
         createdAt: now - 2 * DAY,
       },
+      ...generatedFragments,
     ]),
     projects: keyBy([
       {
@@ -546,8 +671,9 @@ export function createSeedState(): AppState {
         saves: 71,
         createdAt: now - 13 * DAY,
       },
+      ...generatedProjects,
     ]),
-    nodes: keyBy([...mainNodes, ...proj2Nodes, ...mixedColorNodes]),
+    nodes: keyBy([...mainNodes, ...proj2Nodes, ...mixedColorNodes, ...generatedNodes]),
     comments: [
       { id: "c1", targetId: "p1", authorId: "ayon", text: "这个 beat 太上头了，我来加编曲！", createdAt: now - 17 * DAY },
       { id: "c2", targetId: "p1", authorId: "sheng", text: "副歌词我已经在写了 👀", createdAt: now - 15 * DAY },
